@@ -6,22 +6,25 @@ import (
 
 	"github.com/liennie/AdventOfCode/common/load"
 	"github.com/liennie/AdventOfCode/common/log"
+	"github.com/liennie/AdventOfCode/common/set"
 	"github.com/liennie/AdventOfCode/common/util"
 )
 
-func parse(filename string) []map[rune]int {
-	counts := []map[rune]int{}
+func count(values set.String) []map[byte]int {
+	counts := []map[byte]int{}
 
-	for line := range load.File(filename) {
-		for i, r := range line {
+	for value := range values {
+		for i := 0; i < len(value); i++ {
+			b := value[i]
+
 			if i >= len(counts) {
-				counts = append(counts, make([]map[rune]int, i-len(counts)+1)...)
+				counts = append(counts, make([]map[byte]int, i-len(counts)+1)...)
 			}
 			if counts[i] == nil {
-				counts[i] = map[rune]int{}
+				counts[i] = map[byte]int{}
 			}
 
-			counts[i][r]++
+			counts[i][b]++
 		}
 	}
 
@@ -36,30 +39,76 @@ func parseBin(s string) int {
 	return int(i)
 }
 
-func rates(counts []map[rune]int) (int, int) {
+func mostCommon(counts map[byte]int) byte {
+	max := 0
+	var maxB byte
+	for b, c := range counts {
+		if c == max {
+			if b > maxB {
+				maxB = b
+			}
+		} else if c > max {
+			max = c
+			maxB = b
+		}
+	}
+	return maxB
+}
+
+func leastCommon(counts map[byte]int) byte {
+	min := int(^uint(0) >> 1)
+	var minB byte
+	for b, c := range counts {
+		if c == min {
+			if b < minB {
+				minB = b
+			}
+		} else if c < min {
+			min = c
+			minB = b
+		}
+	}
+	return minB
+}
+
+func rates(counts []map[byte]int) (int, int) {
 	gamma := &strings.Builder{}
 	epsilon := &strings.Builder{}
 
 	for _, m := range counts {
-		max := 0
-		min := int(^uint(0) >> 1)
-		var maxR rune
-		var minR rune
-		for r, c := range m {
-			if c > max {
-				max = c
-				maxR = r
-			}
-			if c < min {
-				min = c
-				minR = r
-			}
-		}
-		gamma.WriteRune(maxR)
-		epsilon.WriteRune(minR)
+		gamma.WriteByte(mostCommon(m))
+		epsilon.WriteByte(leastCommon(m))
 	}
 
 	return parseBin(gamma.String()), parseBin(epsilon.String())
+}
+
+func rating(values set.String, criteria func(map[byte]int) byte) int {
+	i := 0
+
+	for len(values) > 1 {
+		counts := count(values)
+		b := criteria(counts[i])
+		for value := range values {
+			if value[i] != b {
+				values.Remove(value)
+			}
+		}
+		i++
+	}
+
+	for value := range values {
+		return parseBin(value)
+	}
+	panic("Empty set")
+}
+
+func oxygenRating(values set.String) int {
+	return rating(values, mostCommon)
+}
+
+func co2Rating(values set.String) int {
+	return rating(values, leastCommon)
 }
 
 func main() {
@@ -67,9 +116,13 @@ func main() {
 
 	const filename = "input.txt"
 
-	counts := parse(filename)
-	gamma, epsilon := rates(counts)
-
 	// Part 1
+	counts := count(load.Set(filename))
+	gamma, epsilon := rates(counts)
 	log.Part1(gamma * epsilon)
+
+	// Part 2
+	oxygen := oxygenRating(load.Set(filename))
+	co2 := co2Rating(load.Set(filename))
+	log.Part2(oxygen * co2)
 }

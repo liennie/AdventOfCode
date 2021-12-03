@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"strings"
+
+	"github.com/liennie/AdventOfCode/common/set"
 )
 
 func File(filename string) <-chan string {
@@ -36,4 +38,20 @@ func File(filename string) <-chan string {
 	}()
 
 	return ch
+}
+
+func Slice(filename string) []string {
+	res := []string{}
+
+	for line := range File(filename) {
+		res = append(res, line)
+	}
+
+	return res
+}
+
+func Set(filename string) set.String {
+	res := set.String{}
+	res.Add(Slice(filename)...)
+	return res
 }
