@@ -1,19 +1,21 @@
 package main
 
 import (
+	"container/list"
 	"strconv"
 	"strings"
 
 	"github.com/liennie/AdventOfCode/common/load"
 	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/set"
 	"github.com/liennie/AdventOfCode/common/util"
 )
 
-func count(values set.String) []map[byte]int {
+func count(values *list.List) []map[byte]int {
 	counts := []map[byte]int{}
 
-	for value := range values {
+	for node := values.Front(); node != nil; node = node.Next() {
+		value := node.Value.(string)
+
 		for i := 0; i < len(value); i++ {
 			b := value[i]
 
@@ -83,31 +85,32 @@ func rates(counts []map[byte]int) (int, int) {
 	return parseBin(gamma.String()), parseBin(epsilon.String())
 }
 
-func rating(values set.String, criteria func(map[byte]int) byte) int {
+func rating(values *list.List, criteria func(map[byte]int) byte) int {
 	i := 0
 
-	for len(values) > 1 {
+	for values.Len() > 1 {
 		counts := count(values)
 		b := criteria(counts[i])
-		for value := range values {
+		var next *list.Element
+		for node := values.Front(); node != nil; node = next {
+			next = node.Next()
+
+			value := node.Value.(string)
 			if value[i] != b {
-				values.Remove(value)
+				values.Remove(node)
 			}
 		}
 		i++
 	}
 
-	for value := range values {
-		return parseBin(value)
-	}
-	panic("Empty set")
+	return parseBin(values.Front().Value.(string))
 }
 
-func oxygenRating(values set.String) int {
+func oxygenRating(values *list.List) int {
 	return rating(values, mostCommon)
 }
 
-func co2Rating(values set.String) int {
+func co2Rating(values *list.List) int {
 	return rating(values, leastCommon)
 }
 
@@ -117,12 +120,12 @@ func main() {
 	const filename = "input.txt"
 
 	// Part 1
-	counts := count(load.Set(filename))
+	counts := count(load.List(filename))
 	gamma, epsilon := rates(counts)
 	log.Part1(gamma * epsilon)
 
 	// Part 2
-	oxygen := oxygenRating(load.Set(filename))
-	co2 := co2Rating(load.Set(filename))
+	oxygen := oxygenRating(load.List(filename))
+	co2 := co2Rating(load.List(filename))
 	log.Part2(oxygen * co2)
 }

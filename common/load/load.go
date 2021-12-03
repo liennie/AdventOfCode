@@ -2,6 +2,7 @@ package load
 
 import (
 	"bufio"
+	"container/list"
 	"fmt"
 	"io"
 	"os"
@@ -53,5 +54,13 @@ func Slice(filename string) []string {
 func Set(filename string) set.String {
 	res := set.String{}
 	res.Add(Slice(filename)...)
+	return res
+}
+
+func List(filename string) *list.List {
+	res := list.New()
+	for _, item := range Slice(filename) {
+		res.PushBack(item)
+	}
 	return res
 }
