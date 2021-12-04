@@ -78,6 +78,14 @@ func (b *board) score() int {
 	return total
 }
 
+func (b *board) reset() {
+	for i, line := range b.marked {
+		for j := range line {
+			b.marked[i][j] = false
+		}
+	}
+}
+
 func parseLine(line string) []int {
 	res := make([]int, 5)
 	for i := 0; i < 5; i++ {
@@ -133,6 +141,28 @@ numbers:
 			if board.won() {
 				log.Part1(board.score() * num)
 				break numbers
+			}
+		}
+	}
+
+	// Part 2
+	for _, board := range boards {
+		board.reset()
+	}
+
+	won := map[int]bool{}
+
+numbers2:
+	for _, num := range numbers {
+		for i, board := range boards {
+			board.mark(num)
+			if board.won() {
+				won[i] = true
+			}
+
+			if len(won) == len(boards) {
+				log.Part1(board.score() * num)
+				break numbers2
 			}
 		}
 	}
