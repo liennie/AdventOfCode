@@ -105,4 +105,24 @@ func main() {
 	}
 
 	log.Part1(count)
+
+	// Part 2
+	diag = map[point]int{}
+	for _, l := range lines {
+		dir := l.dir()
+
+		for p := l.start; !p.equals(l.end); p = p.add(dir) {
+			diag[p]++
+		}
+		diag[l.end]++
+	}
+
+	count = 0
+	for _, c := range diag {
+		if c >= 2 {
+			count++
+		}
+	}
+
+	log.Part2(count)
 }
