@@ -8,50 +8,20 @@ import (
 	"github.com/liennie/AdventOfCode/common/util"
 )
 
-type point struct {
-	x, y int
-}
-
-func (p point) normalize() point {
-	gcd := util.GCD(util.Abs(p.x), util.Abs(p.y))
-	return point{
-		x: p.x / gcd,
-		y: p.y / gcd,
-	}
-}
-
-func (p point) sub(other point) point {
-	return point{
-		x: p.x - other.x,
-		y: p.y - other.y,
-	}
-}
-
-func (p point) add(other point) point {
-	return point{
-		x: p.x + other.x,
-		y: p.y + other.y,
-	}
-}
-
-func (p point) equals(other point) bool {
-	return p.x == other.x && p.y == other.y
-}
-
 type line struct {
-	start, end point
+	start, end util.Point
 }
 
 func (l line) isHorizontal() bool {
-	return l.start.y == l.end.y
+	return l.start.Y == l.end.Y
 }
 
 func (l line) isVertical() bool {
-	return l.start.x == l.end.x
+	return l.start.X == l.end.X
 }
 
-func (l line) dir() point {
-	return l.end.sub(l.start).normalize()
+func (l line) dir() util.Point {
+	return l.end.Sub(l.start).Normalize()
 }
 
 func parse(filename string) []line {
@@ -63,13 +33,13 @@ func parse(filename string) []line {
 		end := strings.SplitN(points[1], ",", 2)
 
 		res = append(res, line{
-			start: point{
-				x: util.Atoi(start[0]),
-				y: util.Atoi(start[1]),
+			start: util.Point{
+				X: util.Atoi(start[0]),
+				Y: util.Atoi(start[1]),
 			},
-			end: point{
-				x: util.Atoi(end[0]),
-				y: util.Atoi(end[1]),
+			end: util.Point{
+				X: util.Atoi(end[0]),
+				Y: util.Atoi(end[1]),
 			},
 		})
 	}
@@ -85,12 +55,12 @@ func main() {
 	lines := parse(filename)
 
 	// Part 1
-	diag := map[point]int{}
+	diag := map[util.Point]int{}
 	for _, l := range lines {
 		if l.isHorizontal() || l.isVertical() {
 			dir := l.dir()
 
-			for p := l.start; !p.equals(l.end); p = p.add(dir) {
+			for p := l.start; !p.Equals(l.end); p = p.Add(dir) {
 				diag[p]++
 			}
 			diag[l.end]++
@@ -107,11 +77,11 @@ func main() {
 	log.Part1(count)
 
 	// Part 2
-	diag = map[point]int{}
+	diag = map[util.Point]int{}
 	for _, l := range lines {
 		dir := l.dir()
 
-		for p := l.start; !p.equals(l.end); p = p.add(dir) {
+		for p := l.start; !p.Equals(l.end); p = p.Add(dir) {
 			diag[p]++
 		}
 		diag[l.end]++
