@@ -38,4 +38,25 @@ func main() {
 		}
 	}
 	log.Part1(len(fish))
+
+	// Part 2
+	fishCount := make([]int, 9)
+	for _, f := range fish {
+		fishCount[f]++
+	}
+
+	for d := 80; d < 256; d++ {
+		new := fishCount[0]
+		for i := 1; i < 9; i++ {
+			fishCount[i-1] = fishCount[i]
+		}
+		fishCount[6] += new
+		fishCount[8] = new
+	}
+
+	total := 0
+	for _, c := range fishCount {
+		total += c
+	}
+	log.Part2(total)
 }
