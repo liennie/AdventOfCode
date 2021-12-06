@@ -157,7 +157,7 @@ numbers2:
 			}
 
 			if len(won) == len(boards) {
-				log.Part1(board.score() * num)
+				log.Part2(board.score() * num)
 				break numbers2
 			}
 		}
