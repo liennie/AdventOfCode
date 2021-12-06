@@ -11,3 +11,11 @@ func Atoi(s string) int {
 	}
 	return i
 }
+
+func SliceAtoi(s []string) []int {
+	res := make([]int, len(s))
+	for i, strNum := range s {
+		res[i] = Atoi(strNum)
+	}
+	return res
+}
