@@ -27,21 +27,39 @@ func cost(pos int, crabs []int) int {
 	return total
 }
 
+func cost2(pos int, crabs []int) int {
+	total := 0
+	for _, crab := range crabs {
+		d := util.Abs(crab - pos)
+		total += (d * (d + 1)) / 2
+	}
+	return total
+}
+
 func main() {
 	defer util.Recover(log.Err)
 
 	const filename = "input.txt"
 
 	crabs := parse(filename)
+	minPos := util.SliceMin(crabs...)
+	maxPos := util.SliceMax(crabs...)
 
 	// Part 1
 	min := util.MaxInt
-	minPos := util.SliceMin(crabs...)
-	maxPos := util.SliceMax(crabs...)
 	for pos := minPos; pos <= maxPos; pos++ {
 		if c := cost(pos, crabs); c < min {
 			min = c
 		}
 	}
 	log.Part1(min)
+
+	// Part 2
+	min = util.MaxInt
+	for pos := minPos; pos <= maxPos; pos++ {
+		if c := cost2(pos, crabs); c < min {
+			min = c
+		}
+	}
+	log.Part2(min)
 }
