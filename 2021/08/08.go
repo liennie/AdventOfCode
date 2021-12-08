@@ -44,45 +44,38 @@ func xorSegments(a, b string) string {
 	return string(res)
 }
 
-func doMagic(e entry) int {
+func disambiguate(e entry) int {
 	digits := [10]string{}
-	fives := []string{}
-	sixes := []string{}
+	ambiguous := []string{}
 
 	for _, pattern := range e.patterns {
 		switch len(pattern) {
 		case 2:
-			digits[1] = sortSegments(pattern)
+			digits[1] = pattern
 		case 3:
-			digits[7] = sortSegments(pattern)
+			digits[7] = pattern
 		case 4:
-			digits[4] = sortSegments(pattern)
+			digits[4] = pattern
 		case 7:
-			digits[8] = sortSegments(pattern)
-		case 5:
-			fives = append(fives, sortSegments(pattern))
-		case 6:
-			sixes = append(sixes, sortSegments(pattern))
+			digits[8] = pattern
+		default:
+			ambiguous = append(ambiguous, pattern)
 		}
 	}
 
-	for _, f := range fives {
-		if x := xorSegments(f, digits[7]); len(x) == 2 {
-			digits[3] = f
-		} else if x := xorSegments(f, digits[4]); len(x) == 5 {
-			digits[2] = f
+	for _, pattern := range ambiguous {
+		if x1 := len(xorSegments(pattern, digits[1])); x1 == 3 {
+			digits[3] = pattern
+		} else if x1 == 6 {
+			digits[6] = pattern
+		} else if x4 := len(xorSegments(pattern, digits[4])); x4 == 2 {
+			digits[9] = pattern
+		} else if x4 == 5 {
+			digits[2] = pattern
+		} else if len(pattern) == 5 {
+			digits[5] = pattern
 		} else {
-			digits[5] = f
-		}
-	}
-
-	for _, s := range sixes {
-		if x := xorSegments(s, digits[4]); len(x) == 2 {
-			digits[9] = s
-		} else if x := xorSegments(s, digits[1]); len(x) == 6 {
-			digits[6] = s
-		} else {
-			digits[0] = s
+			digits[0] = pattern
 		}
 	}
 
@@ -91,11 +84,10 @@ func doMagic(e entry) int {
 		if len(pattern) == 0 {
 			util.Panic("We missed %d", i)
 		}
-		m[pattern] = i
+		m[sortSegments(pattern)] = i
 	}
 
 	res := 0
-
 	for _, digit := range e.digits {
 		d, ok := m[sortSegments(digit)]
 		if !ok {
@@ -105,7 +97,6 @@ func doMagic(e entry) int {
 		res *= 10
 		res += d
 	}
-
 	return res
 }
 
@@ -131,7 +122,7 @@ func main() {
 	// Part 2
 	total := 0
 	for _, entry := range entries {
-		total += doMagic(entry)
+		total += disambiguate(entry)
 	}
 	log.Part2(total)
 }
