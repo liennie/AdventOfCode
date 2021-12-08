@@ -1,3 +1,3 @@
 module github.com/liennie/AdventOfCode
 
-go 1.16
+go 1.17

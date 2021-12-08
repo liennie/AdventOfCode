@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"strings"
 
 	"github.com/liennie/AdventOfCode/common/load"
@@ -46,7 +47,7 @@ func main() {
 	maxPos := util.SliceMax(crabs...)
 
 	// Part 1
-	min := util.MaxInt
+	min := math.MaxInt
 	for pos := minPos; pos <= maxPos; pos++ {
 		if c := cost(pos, crabs); c < min {
 			min = c
@@ -55,7 +56,7 @@ func main() {
 	log.Part1(min)
 
 	// Part 2
-	min = util.MaxInt
+	min = math.MaxInt
 	for pos := minPos; pos <= maxPos; pos++ {
 		if c := cost2(pos, crabs); c < min {
 			min = c

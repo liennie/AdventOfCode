@@ -1,7 +1,8 @@
 package util
 
-const MaxInt = int(^uint(0) >> 1)
-const MinInt = ^int(^uint(0) >> 1)
+import (
+	"math"
+)
 
 func Mod(a, b int) int {
 	m := a % b
@@ -33,7 +34,7 @@ func Max(a, b int) int {
 }
 
 func SliceMin(ns ...int) int {
-	min := MaxInt
+	min := math.MaxInt
 	for _, n := range ns {
 		if n < min {
 			min = n
@@ -44,7 +45,7 @@ func SliceMin(ns ...int) int {
 }
 
 func SliceMax(ns ...int) int {
-	max := MinInt
+	max := math.MinInt
 	for _, n := range ns {
 		if n > max {
 			max = n
