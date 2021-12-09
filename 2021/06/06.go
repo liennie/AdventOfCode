@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strings"
-
 	"github.com/liennie/AdventOfCode/common/load"
 	"github.com/liennie/AdventOfCode/common/log"
 	"github.com/liennie/AdventOfCode/common/util"
@@ -10,13 +8,8 @@ import (
 
 func parse(filename string) []int {
 	ch := load.File(filename)
-
-	defer func() {
-		for range <-ch {
-		}
-	}()
-
-	return util.SliceAtoi(strings.Split(<-ch, ","))
+	defer util.Drain(ch)
+	return util.Split(<-ch, ",")
 }
 
 func main() {
@@ -54,9 +47,5 @@ func main() {
 		fishCount[8] = new
 	}
 
-	total := 0
-	for _, c := range fishCount {
-		total += c
-	}
-	log.Part2(total)
+	log.Part2(util.Sum(fishCount...))
 }

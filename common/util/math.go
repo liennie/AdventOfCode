@@ -55,6 +55,14 @@ func SliceMax(ns ...int) int {
 	return max
 }
 
+func Sum(s ...int) int {
+	sum := 0
+	for _, n := range s {
+		sum += n
+	}
+	return sum
+}
+
 func GCD(a, b int) int {
 	for b != 0 {
 		a, b = b, a%b

@@ -2,7 +2,6 @@ package main
 
 import (
 	"math"
-	"strings"
 
 	"github.com/liennie/AdventOfCode/common/load"
 	"github.com/liennie/AdventOfCode/common/log"
@@ -11,13 +10,8 @@ import (
 
 func parse(filename string) []int {
 	ch := load.File(filename)
-
-	defer func() {
-		for range <-ch {
-		}
-	}()
-
-	return util.SliceAtoi(strings.Split(<-ch, ","))
+	defer util.Drain(ch)
+	return util.Split(<-ch, ",")
 }
 
 func cost(pos int, crabs []int) int {

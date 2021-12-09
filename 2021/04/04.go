@@ -97,7 +97,7 @@ func parseLine(line string) []int {
 func parse(filename string) ([]int, []board) {
 	ch := load.File(filename)
 
-	numbers := util.SliceAtoi(strings.Split(<-ch, ","))
+	numbers := util.Split(<-ch, ",")
 	<-ch // Empty line
 
 	boards := []board{}

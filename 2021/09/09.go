@@ -2,7 +2,6 @@ package main
 
 import (
 	"sort"
-	"strings"
 
 	"github.com/liennie/AdventOfCode/common/load"
 	"github.com/liennie/AdventOfCode/common/log"
@@ -13,7 +12,7 @@ func parse(filename string) [][]int {
 	res := [][]int{}
 
 	for line := range load.File(filename) {
-		res = append(res, util.SliceAtoi(strings.Split(line, "")))
+		res = append(res, util.Split(line, ""))
 	}
 
 	return res
@@ -45,7 +44,7 @@ func main() {
 			}
 		}
 	}
-	log.Part1(util.Sum(low) + len(low))
+	log.Part1(util.Sum(low...) + len(low))
 
 	// Part 2
 	basins := []int{}

@@ -1,5 +1,9 @@
 package util
 
+import (
+	"strings"
+)
+
 func Comb(n int) [][]int {
 	if n < 0 {
 		Panic("Comb(%d)", n)
@@ -43,10 +47,10 @@ func Contains(ns []int, n int) bool {
 	return false
 }
 
-func Sum(s []int) int {
-	sum := 0
-	for _, n := range s {
-		sum += n
-	}
-	return sum
+func Split(s string, sep string) []int {
+	return SliceAtoi(strings.Split(s, sep))
+}
+
+func SplitN(s string, sep string, n int) []int {
+	return SliceAtoi(strings.SplitN(s, sep, n))
 }

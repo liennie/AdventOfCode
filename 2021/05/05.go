@@ -29,17 +29,17 @@ func parse(filename string) []line {
 
 	for l := range load.File(filename) {
 		points := strings.SplitN(l, " -> ", 2)
-		start := strings.SplitN(points[0], ",", 2)
-		end := strings.SplitN(points[1], ",", 2)
+		start := util.SplitN(points[0], ",", 2)
+		end := util.SplitN(points[1], ",", 2)
 
 		res = append(res, line{
 			start: util.Point{
-				X: util.Atoi(start[0]),
-				Y: util.Atoi(start[1]),
+				X: start[0],
+				Y: start[1],
 			},
 			end: util.Point{
-				X: util.Atoi(end[0]),
-				Y: util.Atoi(end[1]),
+				X: end[0],
+				Y: end[1],
 			},
 		})
 	}
