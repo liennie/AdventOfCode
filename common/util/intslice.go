@@ -42,3 +42,11 @@ func Contains(ns []int, n int) bool {
 	}
 	return false
 }
+
+func Sum(s []int) int {
+	sum := 0
+	for _, n := range s {
+		sum += n
+	}
+	return sum
+}
