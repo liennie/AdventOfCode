@@ -1,6 +1,8 @@
 package main
 
 import (
+	"sort"
+
 	"github.com/liennie/AdventOfCode/common/load"
 	"github.com/liennie/AdventOfCode/common/log"
 	"github.com/liennie/AdventOfCode/common/util"
@@ -19,15 +21,21 @@ func main() {
 		'{': '}',
 		'<': '>',
 	}
-	smap := map[rune]int{
+	ssmap := map[rune]int{
 		')': 3,
 		']': 57,
 		'}': 1197,
 		'>': 25137,
 	}
+	asmap := map[rune]int{
+		')': 1,
+		']': 2,
+		'}': 3,
+		'>': 4,
+	}
 
-	// Part 1
-	score := 0
+	syntaxScore := 0
+	autoScores := []int{}
 lines:
 	for _, line := range lines {
 		stack := []rune{}
@@ -37,7 +45,7 @@ lines:
 				stack = append(stack, bmap[r])
 			case ')', ']', '}', '>':
 				if len(stack) == 0 || stack[len(stack)-1] != r {
-					score += smap[r]
+					syntaxScore += ssmap[r]
 					continue lines
 				}
 				stack = stack[:len(stack)-1]
@@ -45,6 +53,16 @@ lines:
 				util.Panic("Invalid rune %c", r)
 			}
 		}
+
+		autoScore := 0
+		for i := len(stack) - 1; i >= 0; i-- {
+			autoScore *= 5
+			autoScore += asmap[stack[i]]
+		}
+		autoScores = append(autoScores, autoScore)
 	}
-	log.Part1(score)
+	log.Part1(syntaxScore)
+
+	sort.Ints(autoScores)
+	log.Part2(autoScores[len(autoScores)/2])
 }
