@@ -82,9 +82,23 @@ func main() {
 	octopuses := parse(filename)
 
 	// Part 1
+	sync := -1
 	total := 0
 	for i := 0; i < 100; i++ {
-		total += step(octopuses)
+		s := step(octopuses)
+		total += s
+		if s == 100 && sync == -1 {
+			sync = i
+		}
 	}
 	log.Part1(total)
+
+	// Part 2
+	for i := 100; sync == -1; i++ {
+		s := step(octopuses)
+		if s == 100 {
+			sync = i + 1
+		}
+	}
+	log.Part2(sync)
 }
