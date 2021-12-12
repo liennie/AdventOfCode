@@ -46,7 +46,7 @@ func parse(filename string) *node {
 	panic("No start")
 }
 
-func countPaths(n *node, visited map[*node]bool) int {
+func countPaths(n *node, visited map[*node]bool, canRevisit bool) int {
 	if n.name == "end" {
 		return 1
 	}
@@ -63,8 +63,9 @@ func countPaths(n *node, visited map[*node]bool) int {
 
 	total := 0
 	for _, con := range n.connected {
-		if !visited[con] {
-			total += countPaths(con, visited)
+		vis := visited[con]
+		if (!vis || canRevisit) && con.name != "start" {
+			total += countPaths(con, visited, (!vis && canRevisit))
 		}
 	}
 	return total
@@ -78,5 +79,8 @@ func main() {
 	start := parse(filename)
 
 	// Part 1
-	log.Part1(countPaths(start, nil))
+	log.Part1(countPaths(start, nil, false))
+
+	// Part 2
+	log.Part2(countPaths(start, nil, true))
 }
