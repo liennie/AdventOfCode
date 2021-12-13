@@ -87,6 +87,21 @@ func countDots(paper [][]bool) int {
 	return count
 }
 
+func printPaper(paper [][]bool) {
+	b := &strings.Builder{}
+	for _, line := range paper {
+		b.Reset()
+		for _, dot := range line {
+			if dot {
+				b.WriteByte('#')
+			} else {
+				b.WriteByte(' ')
+			}
+		}
+		log.Part2(b.String())
+	}
+}
+
 func main() {
 	defer util.Recover(log.Err)
 
@@ -97,4 +112,10 @@ func main() {
 	// Part 1
 	paper = fold(paper, folds[0])
 	log.Part1(countDots(paper))
+
+	// Part 2
+	for i := 1; i < len(folds); i++ {
+		paper = fold(paper, folds[i])
+	}
+	printPaper(paper)
 }
