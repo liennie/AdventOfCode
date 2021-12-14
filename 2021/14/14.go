@@ -9,11 +9,17 @@ import (
 	"github.com/liennie/AdventOfCode/common/util"
 )
 
-func parse(filename string) (string, map[string]string) {
+func parse(filename string) (map[string]int, map[string]string) {
 	ch := load.File(filename)
 
 	template := <-ch
 	<-ch // empty line
+
+	pairs := map[string]int{}
+	for i := 1; i < len(template); i++ {
+		pairs[template[i-1:i+1]]++
+	}
+	pairs[template[len(template)-1:]+"."]++
 
 	rules := map[string]string{}
 	for line := range ch {
@@ -24,33 +30,33 @@ func parse(filename string) (string, map[string]string) {
 		rules[r[0]] = r[1]
 	}
 
-	return template, rules
+	return pairs, rules
 }
 
-func step(template string, rules map[string]string) string {
-	b := &strings.Builder{}
+func step(pairs map[string]int, rules map[string]string) map[string]int {
+	newPairs := map[string]int{}
 
-	for i := 1; i < len(template); i++ {
-		b.WriteByte(template[i-1])
-
-		if insert, ok := rules[template[i-1:i+1]]; ok {
-			b.WriteString(insert)
+	for pair, count := range pairs {
+		if insert, ok := rules[pair]; ok {
+			newPairs[string(pair[0])+insert] += count
+			newPairs[insert+string(pair[1])] += count
+		} else {
+			newPairs[pair] = count
 		}
 	}
-	b.WriteByte(template[len(template)-1])
 
-	return b.String()
+	return newPairs
 }
 
-func score(polymer string) int {
-	count := map[byte]int{}
-	for i := 0; i < len(polymer); i++ {
-		count[polymer[i]]++
+func score(pairs map[string]int) int {
+	counts := map[byte]int{}
+	for pair, count := range pairs {
+		counts[pair[0]] += count
 	}
 
 	min := math.MaxInt
 	max := 0
-	for _, c := range count {
+	for _, c := range counts {
 		if c > max {
 			max = c
 		}
@@ -67,12 +73,17 @@ func main() {
 
 	const filename = "input.txt"
 
-	template, rules := parse(filename)
+	pairs, rules := parse(filename)
 
 	// Part 1
-	polymer := template
 	for i := 0; i < 10; i++ {
-		polymer = step(polymer, rules)
+		pairs = step(pairs, rules)
 	}
-	log.Part1(score(polymer))
+	log.Part1(score(pairs))
+
+	// Part 2
+	for i := 10; i < 40; i++ {
+		pairs = step(pairs, rules)
+	}
+	log.Part2(score(pairs))
 }
