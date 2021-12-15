@@ -56,6 +56,24 @@ func smallestRisk(risk [][]int) int {
 	return totalRisk[end.Y][end.X]
 }
 
+func expand(risk [][]int) [][]int {
+	full := make([][]int, len(risk)*5)
+	for i := range full {
+		ri := i % len(risk)
+		imul := i / len(risk)
+
+		full[i] = make([]int, len(risk[ri])*5)
+		for j := range full[i] {
+			rj := j % len(risk[ri])
+			jmul := j / len(risk[ri])
+
+			full[i][j] = (((risk[ri][rj] + (imul + jmul)) - 1) % 9) + 1
+		}
+	}
+
+	return full
+}
+
 func main() {
 	defer util.Recover(log.Err)
 
@@ -65,4 +83,7 @@ func main() {
 
 	// Part 1
 	log.Part1(smallestRisk(risk))
+
+	// Part 2
+	log.Part2(smallestRisk(expand(risk)))
 }
