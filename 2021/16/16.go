@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -82,6 +83,19 @@ func (p sumPacket) value() int {
 	return sum
 }
 
+func (p sumPacket) String() string {
+	b := &strings.Builder{}
+	b.WriteRune('(')
+	for i, sp := range p.subs {
+		if i > 0 {
+			b.WriteString(" + ")
+		}
+		fmt.Fprint(b, sp)
+	}
+	b.WriteRune(')')
+	return b.String()
+}
+
 type productPacket struct {
 	operatorPacket
 }
@@ -96,6 +110,19 @@ func (p productPacket) value() int {
 		sum *= sp.value()
 	}
 	return sum
+}
+
+func (p productPacket) String() string {
+	b := &strings.Builder{}
+	b.WriteRune('(')
+	for i, sp := range p.subs {
+		if i > 0 {
+			b.WriteString(" * ")
+		}
+		fmt.Fprint(b, sp)
+	}
+	b.WriteRune(')')
+	return b.String()
 }
 
 type minPacket struct {
@@ -116,6 +143,19 @@ func (p minPacket) value() int {
 	return min
 }
 
+func (p minPacket) String() string {
+	b := &strings.Builder{}
+	b.WriteString("Min(")
+	for i, sp := range p.subs {
+		if i > 0 {
+			b.WriteString(", ")
+		}
+		fmt.Fprint(b, sp)
+	}
+	b.WriteRune(')')
+	return b.String()
+}
+
 type maxPacket struct {
 	operatorPacket
 }
@@ -134,6 +174,19 @@ func (p maxPacket) value() int {
 	return max
 }
 
+func (p maxPacket) String() string {
+	b := &strings.Builder{}
+	b.WriteString("Min(")
+	for i, sp := range p.subs {
+		if i > 0 {
+			b.WriteString(", ")
+		}
+		fmt.Fprint(b, sp)
+	}
+	b.WriteRune(')')
+	return b.String()
+}
+
 type literalValuePacket struct {
 	ver int
 	val int
@@ -145,6 +198,10 @@ func (p literalValuePacket) versionSum() int {
 
 func (p literalValuePacket) value() int {
 	return p.val
+}
+
+func (p literalValuePacket) String() string {
+	return strconv.Itoa(p.val)
 }
 
 type gtPacket struct {
@@ -162,6 +219,10 @@ func (p gtPacket) value() int {
 	return 0
 }
 
+func (p gtPacket) String() string {
+	return fmt.Sprintf("(%s > %s)", p.subs[0], p.subs[1])
+}
+
 type ltPacket struct {
 	operatorPacket
 }
@@ -177,6 +238,10 @@ func (p ltPacket) value() int {
 	return 0
 }
 
+func (p ltPacket) String() string {
+	return fmt.Sprintf("(%s < %s)", p.subs[0], p.subs[1])
+}
+
 type eqPacket struct {
 	operatorPacket
 }
@@ -190,6 +255,10 @@ func (p eqPacket) value() int {
 		return 1
 	}
 	return 0
+}
+
+func (p eqPacket) String() string {
+	return fmt.Sprintf("(%s = %s)", p.subs[0], p.subs[1])
 }
 
 type genericOperatorPacket struct {
@@ -301,6 +370,8 @@ func main() {
 
 	r := loadFile(filename)
 	packet := parsePacket(r)
+
+	log.Printf("%s", packet)
 
 	// Part 1
 	log.Part1(packet.versionSum())
