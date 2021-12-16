@@ -245,8 +245,6 @@ const (
 
 func parsePacket(r *bitReader) packet {
 	ver := r.next(3)
-	_ = ver
-
 	id := r.next(3)
 
 	switch id {
