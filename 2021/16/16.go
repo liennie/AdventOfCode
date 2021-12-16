@@ -176,7 +176,7 @@ func (p maxPacket) value() int {
 
 func (p maxPacket) String() string {
 	b := &strings.Builder{}
-	b.WriteString("Min(")
+	b.WriteString("Max(")
 	for i, sp := range p.subs {
 		if i > 0 {
 			b.WriteString(", ")
