@@ -31,10 +31,29 @@ func parse(filename string) (util.Point, util.Point) {
 	return min, max
 }
 
+func valid(vel, min, max util.Point) bool {
+	pos := util.Point{X: 0, Y: 0}
+	for pos.X <= max.X && pos.Y >= min.Y {
+		if pos.X >= min.X && pos.Y <= max.Y {
+			return true
+		}
+
+		pos = pos.Add(vel)
+		if vel.X > 0 {
+			vel.X--
+		} else if vel.X < 0 {
+			vel.X++
+		}
+		vel.Y--
+	}
+
+	return false
+}
+
 func main() {
 	defer util.Recover(log.Err)
 
-	const filename = "test.txt"
+	const filename = "input.txt"
 
 	min, max := parse(filename)
 
@@ -48,4 +67,27 @@ func main() {
 	}
 
 	// Part 2
+	count := 0
+	maxX := max.X
+	minX := 0
+	var maxY, minY int
+	if max.Y < 0 {
+		maxY = -min.Y - 1
+		minY = min.Y
+	} else if min.Y > 0 {
+		maxY = max.Y
+		minY = 0
+	} else {
+		log.Part2("Inf")
+		return
+	}
+
+	for x := minX; x <= maxX; x++ {
+		for y := minY; y <= maxY; y++ {
+			if valid(util.Point{X: x, Y: y}, min, max) {
+				count++
+			}
+		}
+	}
+	log.Part2(count)
 }
