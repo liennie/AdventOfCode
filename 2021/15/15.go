@@ -32,9 +32,13 @@ func smallestRisk(risk [][]int) int {
 		{X: 0, Y: 0}: true,
 	}
 	for len(points) > 0 {
-		var p util.Point
-		for p = range points {
-			break
+		mr := math.MaxInt
+		p := util.Point{X: len(risk[0]), Y: len(risk)}
+		for pp := range points {
+			if totalRisk[pp.Y][pp.X] < mr {
+				mr = totalRisk[pp.Y][pp.X]
+				p = pp
+			}
 		}
 		delete(points, p)
 
