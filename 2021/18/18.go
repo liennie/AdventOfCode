@@ -14,6 +14,7 @@ type number interface {
 	setParent(number)
 	level() int
 	magnitude() int
+	clone() number
 }
 
 type node struct {
@@ -71,6 +72,10 @@ func (n *rootNode) magnitude() int {
 	return n.child.magnitude()
 }
 
+func (n *rootNode) clone() number {
+	return newRoot(n.child.clone())
+}
+
 type pair struct {
 	node
 	left, right number
@@ -98,6 +103,10 @@ func (p *pair) magnitude() int {
 	return 3*p.left.magnitude() + 2*p.right.magnitude()
 }
 
+func (p *pair) clone() number {
+	return newPair(p.left.clone(), p.right.clone())
+}
+
 type regular struct {
 	node
 	val int
@@ -117,6 +126,10 @@ func (r *regular) String() string {
 
 func (r *regular) magnitude() int {
 	return r.val
+}
+
+func (r *regular) clone() number {
+	return newRegular(r.val)
 }
 
 func expect(num string, s string) string {
@@ -311,6 +324,15 @@ func reduce(n number) {
 	}
 }
 
+func add(a, b *rootNode) *rootNode {
+	res := newRoot(newPair(
+		a.child.clone(),
+		b.child.clone(),
+	))
+	reduce(res)
+	return res
+}
+
 func main() {
 	defer util.Recover(log.Err)
 
@@ -321,8 +343,25 @@ func main() {
 	// Part 1
 	res := numbers[0]
 	for i := 1; i < len(numbers); i++ {
-		res = newRoot(newPair(res.child, numbers[i].child))
-		reduce(res)
+		res = add(res, numbers[i])
 	}
 	log.Part1(res.magnitude())
+
+	// Part 2
+	max := 0
+	for i := range numbers {
+		for j := range numbers {
+			if i == j {
+				continue
+			}
+
+			if mag := add(numbers[i], numbers[j]).magnitude(); mag > max {
+				max = mag
+			}
+			if mag := add(numbers[j], numbers[i]).magnitude(); mag > max {
+				max = mag
+			}
+		}
+	}
+	log.Part2(max)
 }
