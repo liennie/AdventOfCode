@@ -201,4 +201,15 @@ func main() {
 	}
 
 	log.Part1(len(beacons))
+
+	// Part 2
+	max := 0
+	for _, a := range disambiguated {
+		for _, b := range disambiguated {
+			if l := a.pos.Sub(b.pos).EuclidLen(); l > max {
+				max = l
+			}
+		}
+	}
+	log.Part2(max)
 }
