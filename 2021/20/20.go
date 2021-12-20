@@ -112,12 +112,15 @@ func main() {
 
 	img, iea := parse(filename)
 
-	// img.print()
-
 	// Part 1
 	for i := 0; i < 2; i++ {
 		img = step(img, iea)
-		// img.print()
 	}
 	log.Part1(len(img.data))
+
+	// Part 2
+	for i := 2; i < 50; i++ {
+		img = step(img, iea)
+	}
+	log.Part2(len(img.data))
 }
