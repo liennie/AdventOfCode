@@ -1,6 +1,8 @@
 package main
 
 import (
+	"container/list"
+	"math"
 	"strings"
 
 	"github.com/liennie/AdventOfCode/common/load"
@@ -8,9 +10,82 @@ import (
 	"github.com/liennie/AdventOfCode/common/util"
 )
 
-type step struct {
+type cube struct {
 	min, max util.Point3
-	on       bool
+}
+
+func rangeIntersects(aMin, aMax, bMin, bMax int) (int, int, bool) {
+	if aMin > bMin {
+		aMin, aMax, bMin, bMax = bMin, bMax, aMin, aMax
+	}
+
+	if aMax >= bMin {
+		return bMin, util.Min(aMax, bMax), true
+	}
+
+	return 0, -1, false
+}
+
+func (c cube) intersects(other cube) (cube, bool) {
+	res := cube{}
+	var okx, oky, okz bool
+
+	res.min.X, res.max.X, okx = rangeIntersects(c.min.X, c.max.X, other.min.X, other.max.X)
+	res.min.Y, res.max.Y, oky = rangeIntersects(c.min.Y, c.max.Y, other.min.Y, other.max.Y)
+	res.min.Z, res.max.Z, okz = rangeIntersects(c.min.Z, c.max.Z, other.min.Z, other.max.Z)
+
+	return res, okx && oky && okz
+}
+
+func (c cube) remove(other cube) ([]cube, bool) {
+	cutout, ok := c.intersects(other)
+	if !ok {
+		return []cube{c}, false
+	}
+
+	res := []cube{}
+
+	for _, split := range []cube{
+		{
+			min: util.Point3{X: math.MinInt, Y: math.MinInt, Z: math.MinInt},
+			max: util.Point3{X: cutout.min.X - 1, Y: math.MaxInt, Z: math.MaxInt},
+		},
+		{
+			min: util.Point3{X: cutout.max.X + 1, Y: math.MinInt, Z: math.MinInt},
+			max: util.Point3{X: math.MaxInt, Y: math.MaxInt, Z: math.MaxInt},
+		},
+		{
+			min: util.Point3{X: cutout.min.X, Y: math.MinInt, Z: math.MinInt},
+			max: util.Point3{X: cutout.max.X, Y: cutout.min.Y - 1, Z: math.MaxInt},
+		},
+		{
+			min: util.Point3{X: cutout.min.X, Y: cutout.max.Y + 1, Z: math.MinInt},
+			max: util.Point3{X: cutout.max.X, Y: math.MaxInt, Z: math.MaxInt},
+		},
+		{
+			min: util.Point3{X: cutout.min.X, Y: cutout.min.Y, Z: math.MinInt},
+			max: util.Point3{X: cutout.max.X, Y: cutout.max.Y, Z: cutout.min.Z - 1},
+		},
+		{
+			min: util.Point3{X: cutout.min.X, Y: cutout.min.Y, Z: cutout.max.Z + 1},
+			max: util.Point3{X: cutout.max.X, Y: cutout.max.Y, Z: math.MaxInt},
+		},
+	} {
+		if in, ok := c.intersects(split); ok {
+			res = append(res, in)
+		}
+	}
+
+	return res, true
+}
+
+func (c cube) size() int {
+	return (c.max.X - c.min.X + 1) * (c.max.Y - c.min.Y + 1) * (c.max.Z - c.min.Z + 1)
+}
+
+type step struct {
+	cube cube
+	on   bool
 }
 
 func parse(filename string) []step {
@@ -31,14 +106,14 @@ func parse(filename string) []step {
 
 			switch p[0] {
 			case "x":
-				s.min.X = util.Min(m[0], m[1])
-				s.max.X = util.Max(m[0], m[1])
+				s.cube.min.X = util.Min(m[0], m[1])
+				s.cube.max.X = util.Max(m[0], m[1])
 			case "y":
-				s.min.Y = util.Min(m[0], m[1])
-				s.max.Y = util.Max(m[0], m[1])
+				s.cube.min.Y = util.Min(m[0], m[1])
+				s.cube.max.Y = util.Max(m[0], m[1])
 			case "z":
-				s.min.Z = util.Min(m[0], m[1])
-				s.max.Z = util.Max(m[0], m[1])
+				s.cube.min.Z = util.Min(m[0], m[1])
+				s.cube.max.Z = util.Max(m[0], m[1])
 			}
 		}
 
@@ -47,20 +122,36 @@ func parse(filename string) []step {
 	return res
 }
 
-func reboot(steps []step, min, max util.Point3) map[util.Point3]bool {
-	res := map[util.Point3]bool{}
+func count(cubes *list.List, limit cube) int {
+	total := 0
+
+	for c := cubes.Front(); c != nil; c = c.Next() {
+		if lc, ok := c.Value.(cube).intersects(limit); ok {
+			total += lc.size()
+		}
+	}
+
+	return total
+}
+
+func reboot(steps []step) *list.List {
+	res := list.New()
 
 	for _, step := range steps {
-		for x := util.Max(step.min.X, min.X); x <= util.Min(step.max.X, max.X); x++ {
-			for y := util.Max(step.min.Y, min.Y); y <= util.Min(step.max.Y, max.Y); y++ {
-				for z := util.Max(step.min.Z, min.Z); z <= util.Min(step.max.Z, max.Z); z++ {
-					if step.on {
-						res[util.Point3{X: x, Y: y, Z: z}] = true
-					} else {
-						delete(res, util.Point3{X: x, Y: y, Z: z})
-					}
+		var next *list.Element
+		for c := res.Front(); c != nil; c = next {
+			next = c.Next()
+
+			if newCubes, ok := c.Value.(cube).remove(step.cube); ok {
+				res.Remove(c)
+				for _, nc := range newCubes {
+					res.PushBack(nc)
 				}
 			}
+		}
+
+		if step.on {
+			res.PushBack(step.cube)
 		}
 	}
 
@@ -73,7 +164,17 @@ func main() {
 	const filename = "input.txt"
 
 	steps := parse(filename)
+	cubes := reboot(steps)
 
 	// Part 1
-	log.Part1(len(reboot(steps, util.Point3{X: -50, Y: -50, Z: -50}, util.Point3{X: 50, Y: 50, Z: 50})))
+	log.Part1(count(cubes, cube{
+		min: util.Point3{X: -50, Y: -50, Z: -50},
+		max: util.Point3{X: 50, Y: 50, Z: 50},
+	}))
+
+	// Part 2
+	log.Part2(count(cubes, cube{
+		min: util.Point3{X: math.MinInt, Y: math.MinInt, Z: math.MinInt},
+		max: util.Point3{X: math.MaxInt, Y: math.MaxInt, Z: math.MaxInt},
+	}))
 }
