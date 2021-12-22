@@ -172,7 +172,7 @@ func main() {
 				var pos util.Point3
 				var found int
 				for p, c := range candidates {
-					if c >= 12 {
+					if c >= (11*12)/2 {
 						pos = p
 						found++
 					}
