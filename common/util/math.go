@@ -33,6 +33,16 @@ func Max(a, b int) int {
 	return b
 }
 
+func Clamp(a, min, max int) int {
+	if a < min {
+		return min
+	}
+	if a > max {
+		return max
+	}
+	return a
+}
+
 func SliceMin(ns ...int) int {
 	min := math.MaxInt
 	for _, n := range ns {
