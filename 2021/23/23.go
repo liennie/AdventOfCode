@@ -1,8 +1,8 @@
 package main
 
 import (
+	"container/list"
 	"fmt"
-	"math"
 	"strings"
 
 	"github.com/liennie/AdventOfCode/common/load"
@@ -50,35 +50,39 @@ func (b *burrow) get(i int) *byte {
 	return &b.rooms[r][d]
 }
 
-func (b burrow) dist(from, to int) int {
-	if from == to {
-		return 0
+func (b burrow) dist(hall, roomI int) int {
+	room, depth := room(roomI)
+	roomHall := room + 1
+	if hall > roomHall {
+		roomHall++
 	}
 
-	if from < 7 && to < 7 {
-		min, max := util.Min(from, to), util.Max(from, to)
+	min, max := util.Min(roomHall, hall), util.Max(roomHall, hall)
 
-		return (util.Clamp(max, 0, 1) - util.Clamp(min, 0, 1)) +
-			((util.Clamp(max, 1, 5) - util.Clamp(min, 1, 5)) * 2) +
-			(util.Clamp(max, 5, 6) - util.Clamp(min, 5, 6))
+	return (util.Clamp(max, 0, 1) - util.Clamp(min, 0, 1)) +
+		((util.Clamp(max, 1, 5) - util.Clamp(min, 1, 5)) * 2) +
+		(util.Clamp(max, 5, 6) - util.Clamp(min, 5, 6)) +
+		depth + 2
+}
+
+func (b burrow) obstacles(hall, roomI int) []int {
+	res := []int{}
+
+	room, depth := room(roomI)
+	roomHall := room + 1
+	if hall <= roomHall {
+		roomHall++
 	}
 
-	if from < 7 || to < 7 {
-		hall := util.Min(from, to)
-		room, depth := room(util.Max(from, to))
-		roomHall := room + 1
-		if hall > roomHall {
-			roomHall++
-		}
-		return depth + 2 + b.dist(roomHall, hall)
+	for d := 0; d < depth; d++ {
+		res = append(res, roomIndex(room, d))
+	}
+	min, max := util.Min(roomHall, hall), util.Max(roomHall, hall)
+	for h := min + 1; h <= max-1; h++ {
+		res = append(res, h)
 	}
 
-	fromRoom, fromDepth := room(from)
-	toRoom, toDepth := room(to)
-	if fromRoom == toRoom {
-		return util.Max(fromDepth, toDepth) - util.Min(fromDepth, toDepth)
-	}
-	return fromDepth + 2 + toDepth + 2 + ((util.Max(fromRoom, toRoom) - util.Min(fromRoom, toRoom)) * 2)
+	return res
 }
 
 var cost = map[byte]int{
@@ -88,88 +92,14 @@ var cost = map[byte]int{
 	'D': 1000,
 }
 
-func (b burrow) cost(from, to int) int {
-	if c, ok := cost[*b.get(from)]; ok {
-		return c * b.dist(from, to)
-	}
-	util.Panic("Invalid amphipod: %c", *b.get(from))
-	return 0
-}
-
-func (b burrow) obstacles(from, to int) []int {
-	if from == to {
-		return nil
-	}
-
-	res := []int{}
-
-	if from < 7 && to < 7 {
-		min, max := util.Min(from, to), util.Max(from, to)
-		for hall := min + 1; hall <= max-1; hall++ {
-			res = append(res, hall)
-		}
-		return res
-	}
-
-	if from < 7 || to < 7 {
-		hall := util.Min(from, to)
-		room, depth := room(util.Max(from, to))
-		roomHall := room + 1
-		if hall <= roomHall {
-			roomHall++
-		}
-
-		for d := 0; d < depth; d++ {
-			res = append(res, roomIndex(room, d))
-		}
-		min, max := util.Min(roomHall, hall), util.Max(roomHall, hall)
-		for h := min + 1; h <= max-1; h++ {
-			res = append(res, h)
-		}
-		return res
-	}
-
-	fromRoom, fromDepth := room(from)
-	toRoom, toDepth := room(to)
-	if fromRoom == toRoom {
-		return res
-	}
-
-	for depth := 0; depth < fromDepth; depth++ {
-		res = append(res, roomIndex(fromRoom, depth))
-	}
-	for depth := 0; depth < toDepth; depth++ {
-		res = append(res, roomIndex(toRoom, depth))
-	}
-
-	fromHall := fromRoom + 1
-	toHall := toRoom + 1
-	if toRoom < fromRoom {
-		fromHall++
-	} else {
-		toHall++
-	}
-	min, max := util.Min(fromHall, toHall), util.Max(fromHall, toHall)
-	for hall := min + 1; hall <= max-1; hall++ {
-		res = append(res, hall)
-	}
-	return res
-}
-
 func (b burrow) move(from, to int) (burrow, int, bool) {
-	if from < 7 && to < 7 {
-		return b, 0, false
-	}
-	if from == to {
-		return b, 0, false
-	}
+	hall := util.Min(from, to)
+	roomI := util.Max(from, to)
+
 	fromAmph := *b.get(from)
 	toAmph := *b.get(to)
-	if fromAmph == 0 || toAmph != 0 {
-		return b, 0, false
-	}
 
-	for _, obstacle := range b.obstacles(from, to) {
+	for _, obstacle := range b.obstacles(hall, roomI) {
 		if *b.get(obstacle) != 0 {
 			return b, 0, false
 		}
@@ -188,7 +118,7 @@ func (b burrow) move(from, to int) (burrow, int, bool) {
 		}
 	}
 
-	cost := b.cost(from, to)
+	cost := cost[fromAmph] * b.dist(hall, roomI)
 	*b.get(from), *b.get(to) = toAmph, fromAmph
 	return b, cost, true
 }
@@ -211,6 +141,10 @@ var organized4 = burrow{
 		{'D', 'D', 'D', 'D'},
 	},
 	maxDepth: 3,
+}
+
+func (b burrow) isOrganized() bool {
+	return b == organized2 || b == organized4
 }
 
 func parse(filename string) burrow {
@@ -262,35 +196,6 @@ func generateMoves(b burrow) []move {
 		}
 	}
 
-	for fromRoom := 0; fromRoom < 4; fromRoom++ {
-		for toRoom := 0; toRoom < 4; toRoom++ {
-			if fromRoom == toRoom {
-				continue
-			}
-
-			var fromDepth, toDepth int
-			for depth := 0; depth <= b.maxDepth; depth++ {
-				if b.rooms[fromRoom][depth] != 0 {
-					fromDepth = depth
-					break
-				}
-			}
-			for depth := b.maxDepth; depth >= 0; depth-- {
-				if b.rooms[toRoom][depth] == 0 {
-					toDepth = depth
-					break
-				}
-			}
-
-			if nb, c, ok := b.move(roomIndex(fromRoom, fromDepth), roomIndex(toRoom, toDepth)); ok {
-				moves = append(moves, move{
-					newBurrow: nb,
-					cost:      c,
-				})
-			}
-		}
-	}
-
 	for room := 0; room < 4; room++ {
 		for depth := 0; depth <= b.maxDepth; depth++ {
 			if b.rooms[room][depth] != 0 {
@@ -316,35 +221,49 @@ func organize(b burrow) int {
 	cost := map[burrow]int{
 		b: 0,
 	}
-	next := map[burrow]int{
-		b: 0,
-	}
+	next := list.New()
+	next.PushBack(move{
+		newBurrow: b,
+		cost:      0,
+	})
 
-	for len(next) > 0 {
-		minCost := math.MaxInt
-		var minBurrow burrow
-		for nb, c := range next {
-			if c < minCost {
-				minCost = c
-				minBurrow = nb
-			}
+	for next.Len() > 0 {
+		minCost := next.Front().Value.(move).cost
+		minBurrow := next.Front().Value.(move).newBurrow
+
+		if minBurrow.isOrganized() {
+			return minCost
 		}
 
-		delete(next, minBurrow)
-		for _, move := range generateMoves(minBurrow) {
-			oc, ok := cost[move.newBurrow]
-			if c := move.cost + minCost; !ok || c < oc {
-				cost[move.newBurrow] = c
-				next[move.newBurrow] = c
+		next.Remove(next.Front())
+
+		for _, m := range generateMoves(minBurrow) {
+			oc, ok := cost[m.newBurrow]
+			if c := m.cost + minCost; !ok || c < oc {
+				cost[m.newBurrow] = c
+
+				nm := move{
+					newBurrow: m.newBurrow,
+					cost:      c,
+				}
+
+				ins := false
+				for el := next.Front(); el != nil; el = el.Next() {
+					if c < el.Value.(move).cost {
+						next.InsertBefore(nm, el)
+						ins = true
+						break
+					}
+				}
+				if !ins {
+					next.PushBack(nm)
+				}
 			}
 		}
 	}
 
-	if b.maxDepth == 1 {
-		return cost[organized2]
-	} else {
-		return cost[organized4]
-	}
+	util.Panic("No solution found")
+	return 0
 }
 
 func unfold(b burrow) burrow {
