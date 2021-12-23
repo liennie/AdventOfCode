@@ -11,8 +11,9 @@ import (
 )
 
 type burrow struct {
-	hallway [7]byte
-	rooms   [4][2]byte
+	hallway  [7]byte
+	rooms    [4][4]byte
+	maxDepth int
 }
 
 func (b burrow) String() string {
@@ -26,8 +27,9 @@ func (b burrow) String() string {
 	sb := &strings.Builder{}
 	fmt.Fprintln(sb, "#############")
 	fmt.Fprintf(sb, "#%c%c.%c.%c.%c.%c%c#\n", c(b.hallway[0]), c(b.hallway[1]), c(b.hallway[2]), c(b.hallway[3]), c(b.hallway[4]), c(b.hallway[5]), c(b.hallway[6]))
-	fmt.Fprintf(sb, "###%c#%c#%c#%c###\n", c(b.rooms[0][0]), c(b.rooms[1][0]), c(b.rooms[2][0]), c(b.rooms[3][0]))
-	fmt.Fprintf(sb, "  #%c#%c#%c#%c#\n", c(b.rooms[0][1]), c(b.rooms[1][1]), c(b.rooms[2][1]), c(b.rooms[3][1]))
+	for depth := 0; depth <= b.maxDepth; depth++ {
+		fmt.Fprintf(sb, "###%c#%c#%c#%c###\n", c(b.rooms[0][depth]), c(b.rooms[1][depth]), c(b.rooms[2][depth]), c(b.rooms[3][depth]))
+	}
 	fmt.Fprintln(sb, "  #########")
 	return sb.String()
 }
@@ -179,7 +181,7 @@ func (b burrow) move(from, to int) (burrow, int, bool) {
 		if toRoom != int(amph-'A') {
 			return b, 0, false
 		}
-		for depth := 1; depth > toDepth; depth-- {
+		for depth := b.maxDepth; depth > toDepth; depth-- {
 			if b.rooms[toRoom][depth] != amph {
 				return b, 0, false
 			}
@@ -191,24 +193,33 @@ func (b burrow) move(from, to int) (burrow, int, bool) {
 	return b, cost, true
 }
 
-var organized = burrow{
-	rooms: [4][2]byte{
+var organized2 = burrow{
+	rooms: [4][4]byte{
 		{'A', 'A'},
 		{'B', 'B'},
 		{'C', 'C'},
 		{'D', 'D'},
 	},
+	maxDepth: 1,
 }
 
-func (b burrow) isOrganized() bool {
-	return b == organized
+var organized4 = burrow{
+	rooms: [4][4]byte{
+		{'A', 'A', 'A', 'A'},
+		{'B', 'B', 'B', 'B'},
+		{'C', 'C', 'C', 'C'},
+		{'D', 'D', 'D', 'D'},
+	},
+	maxDepth: 3,
 }
 
 func parse(filename string) burrow {
 	ch := load.File(filename)
 	defer util.Drain(ch)
 
-	res := burrow{}
+	res := burrow{
+		maxDepth: 1,
+	}
 
 	<-ch // #############
 	<-ch // #...........#
@@ -236,7 +247,7 @@ func generateMoves(b burrow) []move {
 	for hall := 0; hall < 7; hall++ {
 		if b.hallway[hall] != 0 {
 			for room := 0; room < 4; room++ {
-				for depth := 1; depth >= 0; depth-- {
+				for depth := b.maxDepth; depth >= 0; depth-- {
 					if b.rooms[room][depth] == 0 {
 						if nb, c, ok := b.move(hall, roomIndex(room, depth)); ok {
 							moves = append(moves, move{
@@ -258,13 +269,13 @@ func generateMoves(b burrow) []move {
 			}
 
 			var fromDepth, toDepth int
-			for depth := 0; depth <= 1; depth++ {
+			for depth := 0; depth <= b.maxDepth; depth++ {
 				if b.rooms[fromRoom][depth] != 0 {
 					fromDepth = depth
 					break
 				}
 			}
-			for depth := 1; depth >= 0; depth-- {
+			for depth := b.maxDepth; depth >= 0; depth-- {
 				if b.rooms[toRoom][depth] == 0 {
 					toDepth = depth
 					break
@@ -281,7 +292,7 @@ func generateMoves(b burrow) []move {
 	}
 
 	for room := 0; room < 4; room++ {
-		for depth := 0; depth <= 1; depth++ {
+		for depth := 0; depth <= b.maxDepth; depth++ {
 			if b.rooms[room][depth] != 0 {
 				for hall := 0; hall < 7; hall++ {
 					if b.hallway[hall] == 0 {
@@ -329,7 +340,24 @@ func organize(b burrow) int {
 		}
 	}
 
-	return cost[organized]
+	if b.maxDepth == 1 {
+		return cost[organized2]
+	} else {
+		return cost[organized4]
+	}
+}
+
+func unfold(b burrow) burrow {
+	return burrow{
+		hallway: b.hallway,
+		rooms: [4][4]byte{
+			{b.rooms[0][0], 'D', 'D', b.rooms[0][1]},
+			{b.rooms[1][0], 'C', 'B', b.rooms[1][1]},
+			{b.rooms[2][0], 'B', 'A', b.rooms[2][1]},
+			{b.rooms[3][0], 'A', 'C', b.rooms[3][1]},
+		},
+		maxDepth: 3,
+	}
 }
 
 func main() {
@@ -343,4 +371,7 @@ func main() {
 
 	// Part 1
 	log.Part1(organize(b))
+
+	// Part 2
+	log.Part2(organize(unfold(b)))
 }
