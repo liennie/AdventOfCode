@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 
@@ -280,23 +279,6 @@ func main() {
 		log.Println(ii+1, len(states))
 	}
 
-	max := 0
-	min := math.MaxInt
-	for z, seq := range states {
-		if z != 0 {
-			continue
-		}
-
-		log.Println(z, seq)
-
-		if seq.max() > max {
-			max = seq.max()
-		}
-		if seq.min() < min {
-			min = seq.min()
-		}
-	}
-
-	log.Part1(max)
-	log.Part2(min)
+	log.Part1(states[0].max())
+	log.Part2(states[0].min())
 }
