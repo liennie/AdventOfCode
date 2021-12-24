@@ -259,20 +259,20 @@ func main() {
 
 	inst := split(parse(filename))
 
-	states := map[alu]best{
-		{}: {},
+	states := map[int]best{
+		0: {},
 	}
 	for ii, insts := range inst {
-		newStates := map[alu]best{}
+		newStates := map[int]best{}
 
-		for a, seq := range states {
+		for z, seq := range states {
 			for i := 1; i <= 9; i++ {
-				na := a
+				na := alu{reg: [4]int{0, 0, 0, z}}
 				na.run(insts, newInput(i))
 
 				seq.maxSeq[ii] = i
 				seq.minSeq[ii] = i
-				newStates[na] = newStates[na].better(seq)
+				newStates[na.reg[3]] = newStates[na.reg[3]].better(seq)
 			}
 		}
 
@@ -282,12 +282,12 @@ func main() {
 
 	max := 0
 	min := math.MaxInt
-	for a, seq := range states {
-		if a.reg[3] != 0 {
+	for z, seq := range states {
+		if z != 0 {
 			continue
 		}
 
-		log.Println(a, seq)
+		log.Println(z, seq)
 
 		if seq.max() > max {
 			max = seq.max()
