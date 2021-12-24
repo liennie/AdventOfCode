@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -211,12 +212,22 @@ func split(instructions []instruction) [][]instruction {
 
 type best struct {
 	maxSeq [14]int
+	minSeq [14]int
 }
 
 func (b best) better(other best) best {
 	for i := range b.maxSeq {
 		if other.maxSeq[i] > b.maxSeq[i] {
 			b.maxSeq = other.maxSeq
+			break
+		}
+	}
+	for i := range b.minSeq {
+		if other.minSeq[i] == 0 {
+			break
+		}
+		if other.minSeq[i] < b.minSeq[i] || b.minSeq[i] == 0 {
+			b.minSeq = other.minSeq
 			break
 		}
 	}
@@ -232,19 +243,22 @@ func (b best) max() int {
 	return n
 }
 
+func (b best) min() int {
+	n := 0
+	for _, m := range b.minSeq {
+		n *= 10
+		n += m
+	}
+	return n
+}
+
 func main() {
 	defer util.Recover(log.Err)
 
 	const filename = "input.txt"
 
-	// inst := parse(filename)
-	// a := alu{}
-	// a.run(inst, newInput(4, 1, 2, 9, 9, 5, 9, 4, 5, 1, 3, 6, 1, 9))
-	// log.Println(a)
-
 	inst := split(parse(filename))
 
-	// Part 1
 	states := map[alu]best{
 		{}: {},
 	}
@@ -257,6 +271,7 @@ func main() {
 				na.run(insts, newInput(i))
 
 				seq.maxSeq[ii] = i
+				seq.minSeq[ii] = i
 				newStates[na] = newStates[na].better(seq)
 			}
 		}
@@ -266,6 +281,7 @@ func main() {
 	}
 
 	max := 0
+	min := math.MaxInt
 	for a, seq := range states {
 		if a.reg[3] != 0 {
 			continue
@@ -276,7 +292,11 @@ func main() {
 		if seq.max() > max {
 			max = seq.max()
 		}
+		if seq.min() < min {
+			min = seq.min()
+		}
 	}
 
 	log.Part1(max)
+	log.Part2(min)
 }
