@@ -93,7 +93,7 @@ func parse(filename string) []scanner {
 		}
 
 		sort.Slice(scanner.beacons, func(i, j int) bool {
-			return scanner.beacons[i].EuclidLen() < scanner.beacons[j].EuclidLen()
+			return scanner.beacons[i].ManhattanLen() < scanner.beacons[j].ManhattanLen()
 		})
 
 		scanner.pairs = createPairs(scanner.beacons)
@@ -206,7 +206,7 @@ func main() {
 	max := 0
 	for _, a := range disambiguated {
 		for _, b := range disambiguated {
-			if l := a.pos.Sub(b.pos).EuclidLen(); l > max {
+			if l := a.pos.Sub(b.pos).ManhattanLen(); l > max {
 				max = l
 			}
 		}

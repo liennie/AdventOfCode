@@ -33,7 +33,7 @@ func (p Point3) Equals(other Point3) bool {
 	return p.X == other.X && p.Y == other.Y && p.Z == other.Z
 }
 
-func (p Point3) EuclidLen() int {
+func (p Point3) ManhattanLen() int {
 	return Abs(p.X) + Abs(p.Y) + Abs(p.Z)
 }
 
