@@ -1,6 +1,6 @@
 package util
 
-func Drain(ch <-chan string) {
-	for range <-ch {
+func Drain[T any](ch <-chan T) {
+	for range ch {
 	}
 }

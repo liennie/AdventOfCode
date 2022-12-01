@@ -10,9 +10,9 @@ func Panic(format string, a ...interface{}) {
 
 func Recover(f func(err error)) {
 	if e := recover(); e != nil {
-		switch e.(type) {
+		switch e := e.(type) {
 		case error:
-			f(e.(error))
+			f(e)
 		default:
 			f(fmt.Errorf("%v", e))
 		}
