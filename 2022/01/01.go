@@ -4,6 +4,7 @@ import (
 	"github.com/liennie/AdventOfCode/common/load"
 	"github.com/liennie/AdventOfCode/common/log"
 	"github.com/liennie/AdventOfCode/common/util"
+	"golang.org/x/exp/slices"
 )
 
 type inventory struct {
@@ -40,9 +41,14 @@ func main() {
 	invs := parse(filename)
 
 	// Part 1
-	max := 0
+	sums := []int{}
 	for _, inv := range invs {
-		max = util.Max(max, util.Sum(inv.calories...))
+		sums = append(sums, util.Sum(inv.calories...))
 	}
-	log.Part1(max)
+	slices.SortFunc(sums, func(a, b int) bool { return a > b })
+
+	log.Part1(sums[0])
+
+	// Part 2
+	log.Part2(util.Sum(sums[:3]...))
 }
