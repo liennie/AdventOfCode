@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"runtime/debug"
 )
 
 func Panic(format string, a ...interface{}) {
@@ -16,5 +17,6 @@ func Recover(f func(err error)) {
 		default:
 			f(fmt.Errorf("%v", e))
 		}
+		debug.PrintStack()
 	}
 }
