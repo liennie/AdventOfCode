@@ -16,6 +16,10 @@ func (a assignment) contains(other assignment) bool {
 	return a.min <= other.min && a.max >= other.max
 }
 
+func (a assignment) overlaps(other assignment) bool {
+	return a.max >= other.min && a.min <= other.max
+}
+
 func parse(filename string) [][2]assignment {
 	res := [][2]assignment{}
 	for line := range load.File(filename) {
@@ -54,4 +58,13 @@ func main() {
 		}
 	}
 	log.Part1(count)
+
+	// Part 1
+	count = 0
+	for _, ass := range assignments {
+		if ass[0].overlaps(ass[1]) {
+			count++
+		}
+	}
+	log.Part2(count)
 }
