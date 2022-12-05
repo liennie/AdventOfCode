@@ -58,4 +58,17 @@ func main() {
 		}
 	}
 	log.Part1(sum)
+
+	// Part 2
+	sum = 0
+	for i := 2; i < len(rucksacks); i += 3 {
+		for item := range set.Intersection(
+			set.Union(rucksacks[i-2].compartments...),
+			set.Union(rucksacks[i-1].compartments...),
+			set.Union(rucksacks[i].compartments...),
+		) {
+			sum += priority(item)
+		}
+	}
+	log.Part2(sum)
 }
