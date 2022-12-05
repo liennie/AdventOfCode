@@ -6,18 +6,35 @@ import (
 	"github.com/liennie/AdventOfCode/common/load"
 	"github.com/liennie/AdventOfCode/common/log"
 	"github.com/liennie/AdventOfCode/common/util"
+	"golang.org/x/exp/slices"
 )
 
 type stack struct {
 	crates []string
 }
 
-func move(count int, from, to *stack) {
+func clone(stacks []stack) []stack {
+	res := make([]stack, len(stacks))
+	for i, s := range stacks {
+		res[i] = stack{
+			crates: slices.Clone(s.crates),
+		}
+	}
+	return res
+}
+
+func move9000(count int, from, to *stack) {
 	for i := 0; i < count; i++ {
 		last := len(from.crates) - 1
 		to.crates = append(to.crates, from.crates[last])
 		from.crates = from.crates[:last]
 	}
+}
+
+func move9001(count int, from, to *stack) {
+	split := len(from.crates) - count
+	to.crates = append(to.crates, from.crates[split:]...)
+	from.crates = from.crates[:split]
 }
 
 type step struct {
@@ -81,11 +98,18 @@ func main() {
 
 	const filename = "input.txt"
 
-	stacks, steps := parse(filename)
+	stacks1, steps := parse(filename)
+	stacks2 := clone(stacks1)
 
 	// Part 1
 	for _, step := range steps {
-		move(step.count, &stacks[step.from], &stacks[step.to])
+		move9000(step.count, &stacks1[step.from], &stacks1[step.to])
 	}
-	log.Part1(top(stacks))
+	log.Part1(top(stacks1))
+
+	// Part 2
+	for _, step := range steps {
+		move9001(step.count, &stacks2[step.from], &stacks2[step.to])
+	}
+	log.Part2(top(stacks2))
 }
