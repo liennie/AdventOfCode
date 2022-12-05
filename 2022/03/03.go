@@ -53,7 +53,7 @@ func main() {
 	// Part 1
 	sum := 0
 	for _, rucksack := range rucksacks {
-		for item := range set.Intersection(rucksack.compartments[0], rucksack.compartments[1]) {
+		for item := range set.Intersection(rucksack.compartments...) {
 			sum += priority(item)
 		}
 	}

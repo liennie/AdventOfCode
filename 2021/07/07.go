@@ -37,8 +37,8 @@ func main() {
 	const filename = "input.txt"
 
 	crabs := parse(filename)
-	minPos := util.SliceMin(crabs...)
-	maxPos := util.SliceMax(crabs...)
+	minPos := util.Min(crabs...)
+	maxPos := util.Max(crabs...)
 
 	// Part 1
 	min := math.MaxInt

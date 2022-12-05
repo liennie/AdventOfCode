@@ -19,20 +19,6 @@ func Abs(i int) int {
 	return i
 }
 
-func Min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func Max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 func Clamp(a, min, max int) int {
 	if a < min {
 		return min
@@ -43,7 +29,7 @@ func Clamp(a, min, max int) int {
 	return a
 }
 
-func SliceMin(ns ...int) int {
+func Min(ns ...int) int {
 	min := math.MaxInt
 	for _, n := range ns {
 		if n < min {
@@ -54,10 +40,32 @@ func SliceMin(ns ...int) int {
 	return min
 }
 
-func SliceMax(ns ...int) int {
+func MinFunc[T any](f func(T) int, ts ...T) int {
+	min := math.MaxInt
+	for _, t := range ts {
+		if n := f(t); n < min {
+			min = n
+		}
+	}
+
+	return min
+}
+
+func Max(ns ...int) int {
 	max := math.MinInt
 	for _, n := range ns {
 		if n > max {
+			max = n
+		}
+	}
+
+	return max
+}
+
+func MaxFunc[T any](f func(T) int, ts ...T) int {
+	max := math.MinInt
+	for _, t := range ts {
+		if n := f(t); n > max {
 			max = n
 		}
 	}
@@ -69,6 +77,14 @@ func Sum(s ...int) int {
 	sum := 0
 	for _, n := range s {
 		sum += n
+	}
+	return sum
+}
+
+func SumFunc[T any](f func(T) int, ts ...T) int {
+	sum := 0
+	for _, t := range ts {
+		sum += f(t)
 	}
 	return sum
 }

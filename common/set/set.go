@@ -1,5 +1,9 @@
 package set
 
+import (
+	"golang.org/x/exp/slices"
+)
+
 type Set[T comparable] map[T]struct{}
 
 type String = Set[string]
@@ -31,14 +35,39 @@ func (s Set[T]) Contains(items ...T) bool {
 	return true
 }
 
-func Intersection[T comparable](a, b Set[T]) Set[T] {
-	if len(b) < len(a) {
-		a, b = b, a
+func Intersection[T comparable](sets ...Set[T]) Set[T] {
+	if len(sets) == 0 {
+		return nil
 	}
 
-	res := Set[T]{}
-	for item := range a {
-		if b.Contains(item) {
+	slices.SortFunc(sets, func(a, b Set[T]) bool { return len(a) < len(b) })
+
+	res := make(Set[T], len(sets[0]))
+items:
+	for item := range sets[0] {
+		for _, set := range sets[1:] {
+			if !set.Contains(item) {
+				continue items
+			}
+		}
+		res.Add(item)
+	}
+	return res
+}
+
+func Union[T comparable](sets ...Set[T]) Set[T] {
+	if len(sets) == 0 {
+		return nil
+	}
+
+	cap := 0
+	for _, set := range sets {
+		cap += len(set)
+	}
+
+	res := make(Set[T], cap)
+	for _, set := range sets {
+		for item := range set {
 			res.Add(item)
 		}
 	}
