@@ -23,6 +23,16 @@ func isUniq(seq string) bool {
 	return true
 }
 
+func findMarker(mlen int, signal string) int {
+	for i := mlen; i < len(signal); i++ {
+		if isUniq(signal[i-mlen : i]) {
+			return i
+		}
+	}
+	util.Panic("Marker of len %d not found", mlen)
+	return 0
+}
+
 func main() {
 	defer util.Recover(log.Err)
 
@@ -31,11 +41,8 @@ func main() {
 	signal := get(filename)
 
 	// Part 1
-	const sop = 4
-	for i := sop; i < len(signal); i++ {
-		if isUniq(signal[i-sop : i]) {
-			log.Part1(i)
-			break
-		}
-	}
+	log.Part1(findMarker(4, signal))
+
+	// Part 2
+	log.Part2(findMarker(14, signal))
 }
