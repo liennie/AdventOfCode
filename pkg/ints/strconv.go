@@ -1,13 +1,15 @@
-package util
+package ints
 
 import (
 	"strconv"
+
+	"github.com/liennie/AdventOfCode/pkg/evil"
 )
 
 func Atoi(s string) int {
 	i, err := strconv.Atoi(s)
 	if err != nil {
-		Panic("Atoi(%s): %w", s, err)
+		evil.Panic("Atoi(%s): %w", s, err)
 	}
 	return i
 }

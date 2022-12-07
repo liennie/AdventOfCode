@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/channel"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 func get(filename string) string {
 	ch := load.File(filename)
-	defer util.Drain(ch)
+	defer channel.Drain(ch)
 	return <-ch
 }
 
@@ -29,14 +30,13 @@ func findMarker(mlen int, signal string) int {
 			return i
 		}
 	}
-	util.Panic("Marker of len %d not found", mlen)
+	evil.Panic("Marker of len %d not found", mlen)
 	return 0
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	signal := get(filename)
 

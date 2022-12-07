@@ -5,17 +5,19 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
+	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
 type pair struct {
-	from, to util.Point3
-	vec      util.Point3
+	from, to space.Point3
+	vec      space.Point3
 }
 
-func (p pair) rot90(r util.Point3) pair {
+func (p pair) rot90(r space.Point3) pair {
 	return pair{
 		from: p.from.Rot90(r),
 		to:   p.to.Rot90(r),
@@ -24,13 +26,13 @@ func (p pair) rot90(r util.Point3) pair {
 }
 
 type scanner struct {
-	beacons []util.Point3
+	beacons []space.Point3
 	pairs   []pair
-	pos     util.Point3
+	pos     space.Point3
 }
 
-func (s scanner) rot90(r util.Point3) scanner {
-	beacons := make([]util.Point3, len(s.beacons))
+func (s scanner) rot90(r space.Point3) scanner {
+	beacons := make([]space.Point3, len(s.beacons))
 	for i := range s.beacons {
 		beacons[i] = s.beacons[i].Rot90(r)
 	}
@@ -46,7 +48,7 @@ func (s scanner) rot90(r util.Point3) scanner {
 	}
 }
 
-func createPairs(beacons []util.Point3) []pair {
+func createPairs(beacons []space.Point3) []pair {
 	res := []pair{}
 
 	for i := 0; i < len(beacons)-1; i++ {
@@ -74,7 +76,7 @@ func parse(filename string) []scanner {
 		}
 
 		if !strings.HasPrefix(s, "--- scanner ") {
-			util.Panic("Invalid format")
+			evil.Panic("Invalid format")
 		}
 
 		scanner := scanner{}
@@ -84,8 +86,8 @@ func parse(filename string) []scanner {
 				break
 			}
 
-			coords := util.SplitN(line, ",", 3)
-			scanner.beacons = append(scanner.beacons, util.Point3{
+			coords := ints.SplitN(line, ",", 3)
+			scanner.beacons = append(scanner.beacons, space.Point3{
 				X: coords[0],
 				Y: coords[1],
 				Z: coords[2],
@@ -104,7 +106,7 @@ func parse(filename string) []scanner {
 	return res
 }
 
-var rots = []util.Point3{
+var rots = []space.Point3{
 	{X: 0, Y: 0, Z: 0},
 	{X: 1, Y: 0, Z: 0},
 	{X: 2, Y: 0, Z: 0},
@@ -132,9 +134,8 @@ var rots = []util.Point3{
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	scanners := parse(filename)
 
@@ -156,7 +157,7 @@ func main() {
 			for _, rot := range rots {
 				s := amb.Value.(scanner).rot90(rot)
 
-				candidates := map[util.Point3]int{}
+				candidates := map[space.Point3]int{}
 				for _, disp := range dis.pairs {
 					for _, ambp := range s.pairs {
 						if disp.vec.Equals(ambp.vec) {
@@ -169,7 +170,7 @@ func main() {
 					}
 				}
 
-				var pos util.Point3
+				var pos space.Point3
 				var found int
 				for p, c := range candidates {
 					if c >= (11*12)/2 {
@@ -190,10 +191,10 @@ func main() {
 	}
 
 	if ambiguous.Len() > 0 {
-		util.Panic("Oh no, %d ambiguous", ambiguous.Len())
+		evil.Panic("Oh no, %d ambiguous", ambiguous.Len())
 	}
 
-	beacons := map[util.Point3]bool{}
+	beacons := map[space.Point3]bool{}
 	for _, scanner := range disambiguated {
 		for _, beacon := range scanner.beacons {
 			beacons[scanner.pos.Add(beacon)] = true

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 type number interface {
@@ -61,7 +61,7 @@ func (n *rootNode) parent() number {
 }
 
 func (n *rootNode) setParent(parent number) {
-	util.Panic("Cannot set parent on root")
+	evil.Panic("Cannot set parent on root")
 }
 
 func (n *rootNode) level() int {
@@ -136,7 +136,7 @@ func expect(num string, s string) string {
 	if strings.HasPrefix(num, s) {
 		return num[len(s):]
 	}
-	util.Panic("Expected %s", s)
+	evil.Panic("Expected %s", s)
 	return ""
 }
 
@@ -165,7 +165,7 @@ func parse(filename string) []*rootNode {
 	for line := range load.File(filename) {
 		num, r := parseNumber(line)
 		if r != "" {
-			util.Panic("Leftovers: %q", r)
+			evil.Panic("Leftovers: %q", r)
 		}
 		res = append(res, newRoot(num))
 	}
@@ -252,7 +252,7 @@ func split(n *regular) {
 
 func replace(from, to number) {
 	if from.parent() == nil {
-		util.Panic("Cannot replace root node")
+		evil.Panic("Cannot replace root node")
 	}
 
 	switch parent := from.parent().(type) {
@@ -334,9 +334,8 @@ func add(a, b *rootNode) *rootNode {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	numbers := parse(filename)
 

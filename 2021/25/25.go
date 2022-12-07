@@ -1,36 +1,38 @@
 package main
 
 import (
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
+	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
-func parse(filename string) (map[util.Point]byte, util.Point) {
-	res := map[util.Point]byte{}
+func parse(filename string) (map[space.Point]byte, space.Point) {
+	res := map[space.Point]byte{}
 
 	y := 0
 	mx := 0
 	for line := range load.File(filename) {
 		for x := 0; x < len(line); x++ {
 			if line[x] == '>' || line[x] == 'v' {
-				res[util.Point{X: x, Y: y}] = line[x]
+				res[space.Point{X: x, Y: y}] = line[x]
 			}
 		}
-		mx = util.Max(mx, len(line))
+		mx = ints.Max(mx, len(line))
 		y++
 	}
 
-	return res, util.Point{X: mx, Y: y}
+	return res, space.Point{X: mx, Y: y}
 }
 
-func step(cucumbers map[util.Point]byte, max util.Point) (map[util.Point]byte, bool) {
-	next := map[util.Point]byte{}
+func step(cucumbers map[space.Point]byte, max space.Point) (map[space.Point]byte, bool) {
+	next := map[space.Point]byte{}
 	moved := false
 
 	for p, c := range cucumbers {
 		if c == '>' {
-			to := util.Point{X: (p.X + 1) % max.X, Y: p.Y}
+			to := space.Point{X: (p.X + 1) % max.X, Y: p.Y}
 			if cucumbers[to] == 0 {
 				moved = true
 				next[to] = c
@@ -43,11 +45,11 @@ func step(cucumbers map[util.Point]byte, max util.Point) (map[util.Point]byte, b
 	}
 
 	cucumbers = next
-	next = map[util.Point]byte{}
+	next = map[space.Point]byte{}
 
 	for p, c := range cucumbers {
 		if c == 'v' {
-			to := util.Point{X: p.X, Y: (p.Y + 1) % max.Y}
+			to := space.Point{X: p.X, Y: (p.Y + 1) % max.Y}
 			if cucumbers[to] == 0 {
 				moved = true
 				next[to] = c
@@ -62,7 +64,7 @@ func step(cucumbers map[util.Point]byte, max util.Point) (map[util.Point]byte, b
 	return next, moved
 }
 
-func simulate(cucumbers map[util.Point]byte, max util.Point) int {
+func simulate(cucumbers map[space.Point]byte, max space.Point) int {
 	moves := 0
 	moved := false
 	for {
@@ -76,9 +78,8 @@ func simulate(cucumbers map[util.Point]byte, max util.Point) int {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	cucumbers, max := parse(filename)
 

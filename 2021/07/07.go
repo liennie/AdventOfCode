@@ -3,21 +3,23 @@ package main
 import (
 	"math"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/channel"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 func parse(filename string) []int {
 	ch := load.File(filename)
-	defer util.Drain(ch)
-	return util.Split(<-ch, ",")
+	defer channel.Drain(ch)
+	return ints.Split(<-ch, ",")
 }
 
 func cost(pos int, crabs []int) int {
 	total := 0
 	for _, crab := range crabs {
-		total += util.Abs(crab - pos)
+		total += ints.Abs(crab - pos)
 	}
 	return total
 }
@@ -25,20 +27,19 @@ func cost(pos int, crabs []int) int {
 func cost2(pos int, crabs []int) int {
 	total := 0
 	for _, crab := range crabs {
-		d := util.Abs(crab - pos)
+		d := ints.Abs(crab - pos)
 		total += (d * (d + 1)) / 2
 	}
 	return total
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	crabs := parse(filename)
-	minPos := util.Min(crabs...)
-	maxPos := util.Max(crabs...)
+	minPos := ints.Min(crabs...)
+	maxPos := ints.Max(crabs...)
 
 	// Part 1
 	min := math.MaxInt

@@ -3,9 +3,10 @@ package main
 import (
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 type assignment struct {
@@ -25,14 +26,14 @@ func parse(filename string) [][2]assignment {
 	for line := range load.File(filename) {
 		a, b, _ := strings.Cut(line, ",")
 
-		aa := util.SplitN(a, "-", 2)
+		aa := ints.SplitN(a, "-", 2)
 		if len(aa) != 2 || aa[0] > aa[1] {
-			util.Panic("Invalid assignment %s", a)
+			evil.Panic("Invalid assignment %s", a)
 		}
 
-		ba := util.SplitN(b, "-", 2)
+		ba := ints.SplitN(b, "-", 2)
 		if len(ba) != 2 || ba[0] > ba[1] {
-			util.Panic("Invalid assignment %s", b)
+			evil.Panic("Invalid assignment %s", b)
 		}
 
 		res = append(res, [2]assignment{
@@ -44,9 +45,8 @@ func parse(filename string) [][2]assignment {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	assignments := parse(filename)
 

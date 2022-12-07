@@ -1,12 +1,14 @@
-package util
+package ints
 
 import (
 	"strings"
+
+	"github.com/liennie/AdventOfCode/pkg/evil"
 )
 
 func Comb(n int) [][]int {
 	if n < 0 {
-		Panic("Comb(%d)", n)
+		evil.Panic("Comb(%d)", n)
 	}
 
 	if n == 0 {
@@ -36,15 +38,6 @@ func Uniq(ns []int) []int {
 	}
 
 	return res
-}
-
-func Contains(ns []int, n int) bool {
-	for _, m := range ns {
-		if m == n {
-			return true
-		}
-	}
-	return false
 }
 
 func Split(s string, sep string) []int {

@@ -3,23 +3,25 @@ package main
 import (
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
+	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
-func parse(filename string) ([][]bool, []util.Point) {
+func parse(filename string) ([][]bool, []space.Point) {
 	ch := load.File(filename)
 
-	points := map[util.Point]bool{}
+	points := map[space.Point]bool{}
 	maxX := 0
 	maxY := 0
 	for line := range ch {
 		if line == "" {
 			break
 		}
-		coords := util.SplitN(line, ",", 2)
-		p := util.Point{
+		coords := ints.SplitN(line, ",", 2)
+		p := space.Point{
 			X: coords[0],
 			Y: coords[1],
 		}
@@ -40,21 +42,21 @@ func parse(filename string) ([][]bool, []util.Point) {
 		paper[p.Y][p.X] = true
 	}
 
-	folds := []util.Point{}
+	folds := []space.Point{}
 	for line := range ch {
 		fold := strings.SplitN(strings.TrimPrefix(line, "fold along "), "=", 2)
 		switch fold[0] {
 		case "x":
-			folds = append(folds, util.Point{X: util.Atoi(fold[1])})
+			folds = append(folds, space.Point{X: ints.Atoi(fold[1])})
 		case "y":
-			folds = append(folds, util.Point{Y: util.Atoi(fold[1])})
+			folds = append(folds, space.Point{Y: ints.Atoi(fold[1])})
 		}
 	}
 
 	return paper, folds
 }
 
-func fold(paper [][]bool, fold util.Point) [][]bool {
+func fold(paper [][]bool, fold space.Point) [][]bool {
 	if fold.X != 0 {
 		for y := range paper {
 			for x := fold.X + 1; x < len(paper[y]); x++ {
@@ -103,9 +105,8 @@ func printPaper(paper [][]bool) {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	paper, folds := parse(filename)
 

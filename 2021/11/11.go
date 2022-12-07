@@ -1,16 +1,18 @@
 package main
 
 import (
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
+	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
 func parse(filename string) [][]int {
 	res := [][]int{}
 
 	for line := range load.File(filename) {
-		res = append(res, util.Split(line, ""))
+		res = append(res, ints.Split(line, ""))
 	}
 
 	return res
@@ -26,7 +28,7 @@ func inBounds(octopuses [][]int, i, j int) bool {
 	return true
 }
 
-func contains(flashes []util.Point, p util.Point) bool {
+func contains(flashes []space.Point, p space.Point) bool {
 	for _, flash := range flashes {
 		if flash.Equals(p) {
 			return true
@@ -36,13 +38,13 @@ func contains(flashes []util.Point, p util.Point) bool {
 }
 
 func step(octopuses [][]int) int {
-	flashes := []util.Point{}
+	flashes := []space.Point{}
 	for i := range octopuses {
 		for j := range octopuses[i] {
 			if inBounds(octopuses, i, j) {
 				octopuses[i][j]++
 				if octopuses[i][j] > 9 {
-					flashes = append(flashes, util.Point{Y: i, X: j})
+					flashes = append(flashes, space.Point{Y: i, X: j})
 				}
 			}
 		}
@@ -60,8 +62,8 @@ func step(octopuses [][]int) int {
 				}
 
 				octopuses[i][j]++
-				if octopuses[i][j] > 9 && !contains(flashes, util.Point{Y: i, X: j}) {
-					flashes = append(flashes, util.Point{Y: i, X: j})
+				if octopuses[i][j] > 9 && !contains(flashes, space.Point{Y: i, X: j}) {
+					flashes = append(flashes, space.Point{Y: i, X: j})
 				}
 			}
 		}
@@ -75,9 +77,8 @@ func step(octopuses [][]int) int {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	octopuses := parse(filename)
 

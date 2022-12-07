@@ -4,9 +4,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 type entry struct {
@@ -82,7 +82,7 @@ func disambiguate(e entry) int {
 	m := map[string]int{}
 	for i, pattern := range digits {
 		if len(pattern) == 0 {
-			util.Panic("We missed %d", i)
+			evil.Panic("We missed %d", i)
 		}
 		m[sortSegments(pattern)] = i
 	}
@@ -91,7 +91,7 @@ func disambiguate(e entry) int {
 	for _, digit := range e.digits {
 		d, ok := m[sortSegments(digit)]
 		if !ok {
-			util.Panic("Unknown digit %q, %+v", d, digits)
+			evil.Panic("Unknown digit %q, %+v", d, digits)
 		}
 
 		res *= 10
@@ -101,9 +101,8 @@ func disambiguate(e entry) int {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	entries := parse(filename)
 

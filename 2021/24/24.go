@@ -5,9 +5,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 type alu struct {
@@ -20,7 +21,7 @@ func (a *alu) String() string {
 
 func (a *alu) store(arg arg, v int) {
 	if !arg.reg {
-		util.Panic("Not a register")
+		evil.Panic("Not a register")
 	}
 	a.reg[arg.v] = v
 }
@@ -59,7 +60,7 @@ func (a *alu) run(instructions []instruction, in *input) {
 			}
 
 		default:
-			util.Panic("Unknown op code %d", inst.op)
+			evil.Panic("Unknown op code %d", inst.op)
 		}
 		// log.Println(a)
 	}
@@ -170,11 +171,11 @@ func parse(filename string) []instruction {
 			inst.op = opEql
 			inst.args = []arg{{reg: true}, {reg: false}}
 		default:
-			util.Panic("Unknown instruction %s", p[0])
+			evil.Panic("Unknown instruction %s", p[0])
 		}
 
 		if len(p)-1 != len(inst.args) {
-			util.Panic("Invalid number of arguments for %s: %d, expected %d", p[0], len(p)-1, len(inst.args))
+			evil.Panic("Invalid number of arguments for %s: %d, expected %d", p[0], len(p)-1, len(inst.args))
 		}
 
 		for i, a := range inst.args {
@@ -183,9 +184,9 @@ func parse(filename string) []instruction {
 				a.v = int(p[i+1][0] - 'w')
 			} else {
 				if a.reg {
-					util.Panic("Instruction %s needs a register as arg %d", p[0], i)
+					evil.Panic("Instruction %s needs a register as arg %d", p[0], i)
 				}
-				a.v = util.Atoi(p[i+1])
+				a.v = ints.Atoi(p[i+1])
 			}
 			inst.args[i] = a
 		}
@@ -252,9 +253,8 @@ func (b best) min() int {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	inst := split(parse(filename))
 

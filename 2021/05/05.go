@@ -3,13 +3,15 @@ package main
 import (
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
+	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
 type line struct {
-	start, end util.Point
+	start, end space.Point
 }
 
 func (l line) isHorizontal() bool {
@@ -20,7 +22,7 @@ func (l line) isVertical() bool {
 	return l.start.X == l.end.X
 }
 
-func (l line) dir() util.Point {
+func (l line) dir() space.Point {
 	return l.end.Sub(l.start).Normalize()
 }
 
@@ -29,15 +31,15 @@ func parse(filename string) []line {
 
 	for l := range load.File(filename) {
 		points := strings.SplitN(l, " -> ", 2)
-		start := util.SplitN(points[0], ",", 2)
-		end := util.SplitN(points[1], ",", 2)
+		start := ints.SplitN(points[0], ",", 2)
+		end := ints.SplitN(points[1], ",", 2)
 
 		res = append(res, line{
-			start: util.Point{
+			start: space.Point{
 				X: start[0],
 				Y: start[1],
 			},
-			end: util.Point{
+			end: space.Point{
 				X: end[0],
 				Y: end[1],
 			},
@@ -48,14 +50,13 @@ func parse(filename string) []line {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	lines := parse(filename)
 
 	// Part 1
-	diag := map[util.Point]int{}
+	diag := map[space.Point]int{}
 	for _, l := range lines {
 		if l.isHorizontal() || l.isVertical() {
 			dir := l.dir()
@@ -77,7 +78,7 @@ func main() {
 	log.Part1(count)
 
 	// Part 2
-	diag = map[util.Point]int{}
+	diag = map[space.Point]int{}
 	for _, l := range lines {
 		dir := l.dir()
 

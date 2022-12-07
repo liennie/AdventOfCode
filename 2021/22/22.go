@@ -5,13 +5,15 @@ import (
 	"math"
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
+	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
 type cube struct {
-	min, max util.Point3
+	min, max space.Point3
 }
 
 func rangeIntersects(aMin, aMax, bMin, bMax int) (int, int, bool) {
@@ -20,7 +22,7 @@ func rangeIntersects(aMin, aMax, bMin, bMax int) (int, int, bool) {
 	}
 
 	if aMax >= bMin {
-		return bMin, util.Min(aMax, bMax), true
+		return bMin, ints.Min(aMax, bMax), true
 	}
 
 	return 0, -1, false
@@ -47,28 +49,28 @@ func (c cube) remove(other cube) ([]cube, bool) {
 
 	for _, split := range []cube{
 		{
-			min: util.Point3{X: math.MinInt, Y: math.MinInt, Z: math.MinInt},
-			max: util.Point3{X: cutout.min.X - 1, Y: math.MaxInt, Z: math.MaxInt},
+			min: space.Point3{X: math.MinInt, Y: math.MinInt, Z: math.MinInt},
+			max: space.Point3{X: cutout.min.X - 1, Y: math.MaxInt, Z: math.MaxInt},
 		},
 		{
-			min: util.Point3{X: cutout.max.X + 1, Y: math.MinInt, Z: math.MinInt},
-			max: util.Point3{X: math.MaxInt, Y: math.MaxInt, Z: math.MaxInt},
+			min: space.Point3{X: cutout.max.X + 1, Y: math.MinInt, Z: math.MinInt},
+			max: space.Point3{X: math.MaxInt, Y: math.MaxInt, Z: math.MaxInt},
 		},
 		{
-			min: util.Point3{X: cutout.min.X, Y: math.MinInt, Z: math.MinInt},
-			max: util.Point3{X: cutout.max.X, Y: cutout.min.Y - 1, Z: math.MaxInt},
+			min: space.Point3{X: cutout.min.X, Y: math.MinInt, Z: math.MinInt},
+			max: space.Point3{X: cutout.max.X, Y: cutout.min.Y - 1, Z: math.MaxInt},
 		},
 		{
-			min: util.Point3{X: cutout.min.X, Y: cutout.max.Y + 1, Z: math.MinInt},
-			max: util.Point3{X: cutout.max.X, Y: math.MaxInt, Z: math.MaxInt},
+			min: space.Point3{X: cutout.min.X, Y: cutout.max.Y + 1, Z: math.MinInt},
+			max: space.Point3{X: cutout.max.X, Y: math.MaxInt, Z: math.MaxInt},
 		},
 		{
-			min: util.Point3{X: cutout.min.X, Y: cutout.min.Y, Z: math.MinInt},
-			max: util.Point3{X: cutout.max.X, Y: cutout.max.Y, Z: cutout.min.Z - 1},
+			min: space.Point3{X: cutout.min.X, Y: cutout.min.Y, Z: math.MinInt},
+			max: space.Point3{X: cutout.max.X, Y: cutout.max.Y, Z: cutout.min.Z - 1},
 		},
 		{
-			min: util.Point3{X: cutout.min.X, Y: cutout.min.Y, Z: cutout.max.Z + 1},
-			max: util.Point3{X: cutout.max.X, Y: cutout.max.Y, Z: math.MaxInt},
+			min: space.Point3{X: cutout.min.X, Y: cutout.min.Y, Z: cutout.max.Z + 1},
+			max: space.Point3{X: cutout.max.X, Y: cutout.max.Y, Z: math.MaxInt},
 		},
 	} {
 		if in, ok := c.intersects(split); ok {
@@ -102,18 +104,18 @@ func parse(filename string) []step {
 
 		for _, c := range strings.SplitN(line, ",", 3) {
 			p := strings.SplitN(c, "=", 2)
-			m := util.SplitN(p[1], "..", 2)
+			m := ints.SplitN(p[1], "..", 2)
 
 			switch p[0] {
 			case "x":
-				s.cube.min.X = util.Min(m[0], m[1])
-				s.cube.max.X = util.Max(m[0], m[1])
+				s.cube.min.X = ints.Min(m[0], m[1])
+				s.cube.max.X = ints.Max(m[0], m[1])
 			case "y":
-				s.cube.min.Y = util.Min(m[0], m[1])
-				s.cube.max.Y = util.Max(m[0], m[1])
+				s.cube.min.Y = ints.Min(m[0], m[1])
+				s.cube.max.Y = ints.Max(m[0], m[1])
 			case "z":
-				s.cube.min.Z = util.Min(m[0], m[1])
-				s.cube.max.Z = util.Max(m[0], m[1])
+				s.cube.min.Z = ints.Min(m[0], m[1])
+				s.cube.max.Z = ints.Max(m[0], m[1])
 			}
 		}
 
@@ -159,22 +161,21 @@ func reboot(steps []step) *list.List {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	steps := parse(filename)
 	cubes := reboot(steps)
 
 	// Part 1
 	log.Part1(count(cubes, cube{
-		min: util.Point3{X: -50, Y: -50, Z: -50},
-		max: util.Point3{X: 50, Y: 50, Z: 50},
+		min: space.Point3{X: -50, Y: -50, Z: -50},
+		max: space.Point3{X: 50, Y: 50, Z: 50},
 	}))
 
 	// Part 2
 	log.Part2(count(cubes, cube{
-		min: util.Point3{X: math.MinInt, Y: math.MinInt, Z: math.MinInt},
-		max: util.Point3{X: math.MaxInt, Y: math.MaxInt, Z: math.MaxInt},
+		min: space.Point3{X: math.MinInt, Y: math.MinInt, Z: math.MinInt},
+		max: space.Point3{X: math.MaxInt, Y: math.MaxInt, Z: math.MaxInt},
 	}))
 }

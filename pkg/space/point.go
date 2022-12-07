@@ -1,11 +1,15 @@
-package util
+package space
+
+import (
+	"github.com/liennie/AdventOfCode/pkg/ints"
+)
 
 type Point struct {
 	X, Y int
 }
 
 func (p Point) Normalize() Point {
-	gcd := GCD(Abs(p.X), Abs(p.Y))
+	gcd := ints.GCD(ints.Abs(p.X), ints.Abs(p.Y))
 	return Point{
 		X: p.X / gcd,
 		Y: p.Y / gcd,

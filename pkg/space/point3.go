@@ -1,11 +1,15 @@
-package util
+package space
+
+import (
+	"github.com/liennie/AdventOfCode/pkg/ints"
+)
 
 type Point3 struct {
 	X, Y, Z int
 }
 
 func (p Point3) Normalize() Point3 {
-	gcd := GCD(GCD(Abs(p.X), Abs(p.Y)), Abs(p.Z))
+	gcd := ints.GCD(ints.GCD(ints.Abs(p.X), ints.Abs(p.Y)), ints.Abs(p.Z))
 	return Point3{
 		X: p.X / gcd,
 		Y: p.Y / gcd,
@@ -34,7 +38,7 @@ func (p Point3) Equals(other Point3) bool {
 }
 
 func (p Point3) ManhattanLen() int {
-	return Abs(p.X) + Abs(p.Y) + Abs(p.Z)
+	return ints.Abs(p.X) + ints.Abs(p.Y) + ints.Abs(p.Z)
 }
 
 func (p Point3) Rot90(r Point3) Point3 {

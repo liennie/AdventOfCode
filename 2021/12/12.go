@@ -3,9 +3,9 @@ package main
 import (
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 type node struct {
@@ -43,7 +43,8 @@ func parse(filename string) *node {
 		return start
 	}
 
-	panic("No start")
+	evil.Panic("No start")
+	return nil
 }
 
 func countPaths(n *node, visited map[*node]bool, canRevisit bool) int {
@@ -72,9 +73,8 @@ func countPaths(n *node, visited map[*node]bool, canRevisit bool) int {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	start := parse(filename)
 

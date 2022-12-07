@@ -3,9 +3,9 @@ package main
 import (
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 type shape int
@@ -18,7 +18,7 @@ const (
 
 func (s shape) score(op shape) int {
 	if s == 0 || op == 0 {
-		util.Panic("Zero shape")
+		evil.Panic("Zero shape")
 	}
 
 	score := int(s)
@@ -43,7 +43,7 @@ func parseShape(in string) shape {
 	case "C":
 		return scissors
 	}
-	util.Panic("Invalid shape %s", in)
+	evil.Panic("Invalid shape %s", in)
 	return 0
 }
 
@@ -64,7 +64,7 @@ func parseStrategy(in string) strategy {
 	case "Z":
 		return strategyZ
 	}
-	util.Panic("Invalid strategy %s", in)
+	evil.Panic("Invalid strategy %s", in)
 	return 0
 }
 
@@ -124,9 +124,8 @@ func correctStrategy(r round) shape {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	rounds := parse(filename)
 

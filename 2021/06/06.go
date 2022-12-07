@@ -1,21 +1,22 @@
 package main
 
 import (
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/channel"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 func parse(filename string) []int {
 	ch := load.File(filename)
-	defer util.Drain(ch)
-	return util.Split(<-ch, ",")
+	defer channel.Drain(ch)
+	return ints.Split(<-ch, ",")
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	fish := parse(filename)
 
@@ -47,5 +48,5 @@ func main() {
 		fishCount[8] = new
 	}
 
-	log.Part2(util.Sum(fishCount...))
+	log.Part2(ints.Sum(fishCount...))
 }

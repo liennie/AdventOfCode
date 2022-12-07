@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
+	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
 type image struct {
-	min, max util.Point
-	data     map[util.Point]bool
+	min, max space.Point
+	data     map[space.Point]bool
 	inf      bool
 }
 
@@ -27,20 +29,20 @@ func parse(filename string) (image, []bool) {
 	}
 	<-ch // empty line
 
-	min := util.Point{X: math.MaxInt, Y: math.MaxInt}
-	max := util.Point{}
-	img := map[util.Point]bool{}
+	min := space.Point{X: math.MaxInt, Y: math.MaxInt}
+	max := space.Point{}
+	img := map[space.Point]bool{}
 
 	i := 0
 	for line := range ch {
 		for j := 0; j < len(line); j++ {
 			if line[j] == '#' {
-				img[util.Point{X: j, Y: i}] = true
+				img[space.Point{X: j, Y: i}] = true
 
-				min.X = util.Min(min.X, j)
-				min.Y = util.Min(min.Y, i)
-				max.X = util.Max(max.X, j)
-				max.Y = util.Max(max.Y, i)
+				min.X = ints.Min(min.X, j)
+				min.Y = ints.Min(min.Y, i)
+				max.X = ints.Max(max.X, j)
+				max.Y = ints.Max(max.Y, i)
 			}
 		}
 		i++
@@ -57,7 +59,7 @@ func step(img image, iea []bool) image {
 	res := image{
 		min:  img.min,
 		max:  img.max,
-		data: map[util.Point]bool{},
+		data: map[space.Point]bool{},
 		inf:  img.inf != iea[0],
 	}
 
@@ -68,7 +70,7 @@ func step(img image, iea []bool) image {
 				for xd := -1; xd <= 1; xd++ {
 					i <<= 1
 
-					p := util.Point{
+					p := space.Point{
 						X: x + xd,
 						Y: y + yd,
 					}
@@ -79,11 +81,11 @@ func step(img image, iea []bool) image {
 			}
 
 			if iea[i] {
-				res.data[util.Point{X: x, Y: y}] = true
-				res.min.X = util.Min(res.min.X, x)
-				res.min.Y = util.Min(res.min.Y, y)
-				res.max.X = util.Max(res.max.X, x)
-				res.max.Y = util.Max(res.max.Y, y)
+				res.data[space.Point{X: x, Y: y}] = true
+				res.min.X = ints.Min(res.min.X, x)
+				res.min.Y = ints.Min(res.min.Y, y)
+				res.max.X = ints.Max(res.max.X, x)
+				res.max.Y = ints.Max(res.max.Y, y)
 			}
 		}
 	}
@@ -94,7 +96,7 @@ func step(img image, iea []bool) image {
 func (img image) print() {
 	for y := img.min.Y; y <= img.max.Y; y++ {
 		for x := img.min.X; x <= img.max.X; x++ {
-			if img.data[util.Point{X: x, Y: y}] {
+			if img.data[space.Point{X: x, Y: y}] {
 				fmt.Print("#")
 			} else {
 				fmt.Print(".")
@@ -106,9 +108,8 @@ func (img image) print() {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	img, iea := parse(filename)
 

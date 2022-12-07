@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 	"golang.org/x/exp/slices"
 )
 
@@ -27,28 +28,27 @@ func parse(filename string) []inventory {
 			last = &res[len(res)-1]
 		}
 
-		last.calories = append(last.calories, util.Atoi(line))
+		last.calories = append(last.calories, ints.Atoi(line))
 	}
 
 	return res
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	invs := parse(filename)
 
 	// Part 1
 	sums := []int{}
 	for _, inv := range invs {
-		sums = append(sums, util.Sum(inv.calories...))
+		sums = append(sums, ints.Sum(inv.calories...))
 	}
 	slices.SortFunc(sums, func(a, b int) bool { return a > b })
 
 	log.Part1(sums[0])
 
 	// Part 2
-	log.Part2(util.Sum(sums[:3]...))
+	log.Part2(ints.Sum(sums[:3]...))
 }

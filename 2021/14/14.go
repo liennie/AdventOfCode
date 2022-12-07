@@ -4,9 +4,9 @@ import (
 	"math"
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 func parse(filename string) (map[string]int, map[string]string) {
@@ -25,7 +25,7 @@ func parse(filename string) (map[string]int, map[string]string) {
 	for line := range ch {
 		r := strings.SplitN(line, " -> ", 2)
 		if len(r[0]) != 2 || len(r[1]) != 1 {
-			util.Panic("Invalid rule %s", line)
+			evil.Panic("Invalid rule %s", line)
 		}
 		rules[r[0]] = r[1]
 	}
@@ -69,9 +69,8 @@ func score(pairs map[string]int) int {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	pairs, rules := parse(filename)
 

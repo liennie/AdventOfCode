@@ -3,9 +3,10 @@ package main
 import (
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 	"golang.org/x/exp/slices"
 )
 
@@ -76,9 +77,9 @@ func parse(filename string) ([]stack, []step) {
 		from, to, _ := strings.Cut(line, " to ")
 
 		steps = append(steps, step{
-			count: util.Atoi(count),
-			from:  util.Atoi(from) - 1,
-			to:    util.Atoi(to) - 1,
+			count: ints.Atoi(count),
+			from:  ints.Atoi(from) - 1,
+			to:    ints.Atoi(to) - 1,
 		})
 	}
 
@@ -94,9 +95,8 @@ func top(stacks []stack) string {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	stacks1, steps := parse(filename)
 	stacks2 := clone(stacks1)

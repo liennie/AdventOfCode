@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 func sum(i []int) int {
@@ -21,7 +22,7 @@ func countIncreases(filename string, window int) int {
 	i := 0
 	prev := int(^uint(0) >> 1)
 	for line := range load.File(filename) {
-		n := util.Atoi(line)
+		n := ints.Atoi(line)
 		buf[i%window] = n
 
 		if i >= (window - 1) {
@@ -39,9 +40,8 @@ func countIncreases(filename string, window int) int {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	// Part 1
 	log.Part1(countIncreases(filename, 1))

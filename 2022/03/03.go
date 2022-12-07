@@ -3,10 +3,10 @@ package main
 import (
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/set"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
+	"github.com/liennie/AdventOfCode/pkg/set"
 )
 
 type rucksack struct {
@@ -29,7 +29,7 @@ func parse(filename string) []rucksack {
 
 func priority(item string) int {
 	if len(item) != 1 {
-		util.Panic("Invalid item len %d", len(item))
+		evil.Panic("Invalid item len %d", len(item))
 	}
 
 	c := item[0]
@@ -39,14 +39,13 @@ func priority(item string) int {
 		return int(c-'A') + 27
 	}
 
-	util.Panic("Invalid item %c", c)
+	evil.Panic("Invalid item %c", c)
 	return 0
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	rucksacks := parse(filename)
 

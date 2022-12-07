@@ -4,16 +4,17 @@ import (
 	"math"
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 func parse(filename string) (int, int) {
 	ch := load.File(filename)
 
-	return util.Atoi(strings.TrimPrefix(<-ch, "Player 1 starting position: ")),
-		util.Atoi(strings.TrimPrefix(<-ch, "Player 2 starting position: "))
+	return ints.Atoi(strings.TrimPrefix(<-ch, "Player 1 starting position: ")),
+		ints.Atoi(strings.TrimPrefix(<-ch, "Player 2 starting position: "))
 }
 
 type deterministicDie struct {
@@ -124,9 +125,8 @@ func playQuantum(aStart, bStart int) stats {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	aStart, bStart := parse(filename)
 

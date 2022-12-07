@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/channel"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 type burrow struct {
@@ -57,11 +59,11 @@ func (b burrow) dist(hall, roomI int) int {
 		roomHall++
 	}
 
-	min, max := util.Min(roomHall, hall), util.Max(roomHall, hall)
+	min, max := ints.Min(roomHall, hall), ints.Max(roomHall, hall)
 
-	return (util.Clamp(max, 0, 1) - util.Clamp(min, 0, 1)) +
-		((util.Clamp(max, 1, 5) - util.Clamp(min, 1, 5)) * 2) +
-		(util.Clamp(max, 5, 6) - util.Clamp(min, 5, 6)) +
+	return (ints.Clamp(max, 0, 1) - ints.Clamp(min, 0, 1)) +
+		((ints.Clamp(max, 1, 5) - ints.Clamp(min, 1, 5)) * 2) +
+		(ints.Clamp(max, 5, 6) - ints.Clamp(min, 5, 6)) +
 		depth + 2
 }
 
@@ -77,7 +79,7 @@ func (b burrow) obstacles(hall, roomI int) []int {
 	for d := 0; d < depth; d++ {
 		res = append(res, roomIndex(room, d))
 	}
-	min, max := util.Min(roomHall, hall), util.Max(roomHall, hall)
+	min, max := ints.Min(roomHall, hall), ints.Max(roomHall, hall)
 	for h := min + 1; h <= max-1; h++ {
 		res = append(res, h)
 	}
@@ -93,8 +95,8 @@ var cost = map[byte]int{
 }
 
 func (b burrow) move(from, to int) (burrow, int, bool) {
-	hall := util.Min(from, to)
-	roomI := util.Max(from, to)
+	hall := ints.Min(from, to)
+	roomI := ints.Max(from, to)
 
 	fromAmph := *b.get(from)
 	toAmph := *b.get(to)
@@ -149,7 +151,7 @@ func (b burrow) isOrganized() bool {
 
 func parse(filename string) burrow {
 	ch := load.File(filename)
-	defer util.Drain(ch)
+	defer channel.Drain(ch)
 
 	res := burrow{
 		maxDepth: 1,
@@ -262,7 +264,7 @@ func organize(b burrow) int {
 		}
 	}
 
-	util.Panic("No solution found")
+	evil.Panic("No solution found")
 	return 0
 }
 
@@ -280,9 +282,8 @@ func unfold(b burrow) burrow {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	b := parse(filename)
 

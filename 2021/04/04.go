@@ -3,9 +3,10 @@ package main
 import (
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 type board struct {
@@ -89,7 +90,7 @@ func (b *board) reset() {
 func parseLine(line string) []int {
 	res := make([]int, 5)
 	for i := 0; i < 5; i++ {
-		res[i] = util.Atoi(strings.TrimSpace(line[i*3 : i*3+2]))
+		res[i] = ints.Atoi(strings.TrimSpace(line[i*3 : i*3+2]))
 	}
 	return res
 }
@@ -97,7 +98,7 @@ func parseLine(line string) []int {
 func parse(filename string) ([]int, []board) {
 	ch := load.File(filename)
 
-	numbers := util.Split(<-ch, ",")
+	numbers := ints.Split(<-ch, ",")
 	<-ch // Empty line
 
 	boards := []board{}
@@ -123,9 +124,8 @@ boards:
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	numbers, boards := parse(filename)
 

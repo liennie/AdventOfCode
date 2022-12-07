@@ -6,9 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/channel"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 type bitReader struct {
@@ -19,7 +20,7 @@ type bitReader struct {
 func (r *bitReader) next(n int) int {
 	res, err := strconv.ParseInt(r.bits[r.pos:r.pos+n], 2, 0)
 	if err != nil {
-		util.Panic("Invalid bits %q: %w", r.bits[r.pos:r.pos+n], err)
+		evil.Panic("Invalid bits %q: %w", r.bits[r.pos:r.pos+n], err)
 	}
 	r.pos += n
 	return int(res)
@@ -46,7 +47,7 @@ var hex2binLut = map[rune]string{
 
 func loadFile(filename string) *bitReader {
 	ch := load.File(filename)
-	defer util.Drain(ch)
+	defer channel.Drain(ch)
 
 	msg := <-ch
 
@@ -73,7 +74,7 @@ type sumPacket struct {
 
 func (p sumPacket) value() int {
 	if len(p.subs) == 0 {
-		util.Panic("No subpackets")
+		evil.Panic("No subpackets")
 	}
 
 	sum := 0
@@ -102,7 +103,7 @@ type productPacket struct {
 
 func (p productPacket) value() int {
 	if len(p.subs) == 0 {
-		util.Panic("No subpackets")
+		evil.Panic("No subpackets")
 	}
 
 	sum := 1
@@ -131,7 +132,7 @@ type minPacket struct {
 
 func (p minPacket) value() int {
 	if len(p.subs) == 0 {
-		util.Panic("No subpackets")
+		evil.Panic("No subpackets")
 	}
 
 	min := math.MaxInt
@@ -162,7 +163,7 @@ type maxPacket struct {
 
 func (p maxPacket) value() int {
 	if len(p.subs) == 0 {
-		util.Panic("No subpackets")
+		evil.Panic("No subpackets")
 	}
 
 	max := math.MinInt
@@ -210,7 +211,7 @@ type gtPacket struct {
 
 func (p gtPacket) value() int {
 	if len(p.subs) != 2 {
-		util.Panic("Invalid number of subpackets")
+		evil.Panic("Invalid number of subpackets")
 	}
 
 	if p.subs[0].value() > p.subs[1].value() {
@@ -229,7 +230,7 @@ type ltPacket struct {
 
 func (p ltPacket) value() int {
 	if len(p.subs) != 2 {
-		util.Panic("Invalid number of subpackets")
+		evil.Panic("Invalid number of subpackets")
 	}
 
 	if p.subs[0].value() < p.subs[1].value() {
@@ -248,7 +249,7 @@ type eqPacket struct {
 
 func (p eqPacket) value() int {
 	if len(p.subs) != 2 {
-		util.Panic("Invalid number of subpackets")
+		evil.Panic("Invalid number of subpackets")
 	}
 
 	if p.subs[0].value() == p.subs[1].value() {
@@ -284,7 +285,7 @@ func (p genericOperatorPacket) impl() packet {
 		return eqPacket{operatorPacket: p.operatorPacket}
 	}
 
-	util.Panic("Invalid operator id %d", p.id)
+	evil.Panic("Invalid operator id %d", p.id)
 	return nil
 }
 
@@ -349,7 +350,7 @@ func parsePacket(r *bitReader) packet {
 				op.subs = append(op.subs, parsePacket(r))
 			}
 			if r.pos > to {
-				util.Panic("Len overflow %d > %d", r.pos, to)
+				evil.Panic("Len overflow %d > %d", r.pos, to)
 			}
 
 		} else {
@@ -364,9 +365,8 @@ func parsePacket(r *bitReader) packet {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	r := loadFile(filename)
 	packet := parsePacket(r)

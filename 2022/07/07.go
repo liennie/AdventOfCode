@@ -3,9 +3,10 @@ package main
 import (
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 type node interface {
@@ -79,10 +80,10 @@ func parse(filename string) *dir {
 						if d, ok := n.(*dir); ok {
 							pwd = append(pwd, d)
 						} else {
-							util.Panic("%s: not a dir", line)
+							evil.Panic("%s: not a dir", line)
 						}
 					} else {
-						util.Panic("%s: not found", line)
+						evil.Panic("%s: not found", line)
 					}
 				}
 
@@ -90,7 +91,7 @@ func parse(filename string) *dir {
 				// nothin
 
 			default:
-				util.Panic("unknown cmd %s", cmd)
+				evil.Panic("unknown cmd %s", cmd)
 			}
 			lastCmd = cmd
 		} else {
@@ -104,7 +105,7 @@ func parse(filename string) *dir {
 				if size == "dir" {
 					pwd[len(pwd)-1].c[name] = &dir{c: map[string]node{}}
 				} else {
-					pwd[len(pwd)-1].c[name] = &file{s: util.Atoi(size)}
+					pwd[len(pwd)-1].c[name] = &file{s: ints.Atoi(size)}
 				}
 			}
 		}
@@ -114,9 +115,8 @@ func parse(filename string) *dir {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	root := parse(filename)
 
@@ -137,7 +137,7 @@ func main() {
 
 	threshold := needed - (total - root.size())
 	if threshold <= 0 {
-		util.Panic("no need to free up space")
+		evil.Panic("no need to free up space")
 	}
 
 	min := total

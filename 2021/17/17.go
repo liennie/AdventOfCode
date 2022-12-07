@@ -3,36 +3,39 @@ package main
 import (
 	"strings"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/channel"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
+	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
-func parse(filename string) (util.Point, util.Point) {
+func parse(filename string) (space.Point, space.Point) {
 	ch := load.File(filename)
-	defer util.Drain(ch)
+	defer channel.Drain(ch)
 
 	line := strings.TrimPrefix(<-ch, "target area: ")
 	coords := strings.SplitN(line, ", ", 2)
 
-	var min, max util.Point
+	var min, max space.Point
 	for _, coord := range coords {
 		if strings.HasPrefix(coord, "x=") {
-			rang := util.SplitN(coord[2:], "..", 2)
-			min.X = util.Min(rang[0], rang[1])
-			max.X = util.Max(rang[0], rang[1])
+			rang := ints.SplitN(coord[2:], "..", 2)
+			min.X = ints.Min(rang[0], rang[1])
+			max.X = ints.Max(rang[0], rang[1])
 		} else {
-			rang := util.SplitN(coord[2:], "..", 2)
-			min.Y = util.Min(rang[0], rang[1])
-			max.Y = util.Max(rang[0], rang[1])
+			rang := ints.SplitN(coord[2:], "..", 2)
+			min.Y = ints.Min(rang[0], rang[1])
+			max.Y = ints.Max(rang[0], rang[1])
 		}
 	}
 
 	return min, max
 }
 
-func valid(vel, min, max util.Point) bool {
-	pos := util.Point{X: 0, Y: 0}
+func valid(vel, min, max space.Point) bool {
+	pos := space.Point{X: 0, Y: 0}
 	for pos.X <= max.X && pos.Y >= min.Y {
 		if pos.X >= min.X && pos.Y <= max.Y {
 			return true
@@ -51,9 +54,8 @@ func valid(vel, min, max util.Point) bool {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	min, max := parse(filename)
 
@@ -84,7 +86,7 @@ func main() {
 
 	for x := minX; x <= maxX; x++ {
 		for y := minY; y <= maxY; y++ {
-			if valid(util.Point{X: x, Y: y}, min, max) {
+			if valid(space.Point{X: x, Y: y}, min, max) {
 				count++
 			}
 		}

@@ -3,16 +3,18 @@ package main
 import (
 	"math"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
+	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
 func parse(filename string) [][]int {
 	res := [][]int{}
 
 	for line := range load.File(filename) {
-		res = append(res, util.Split(line, ""))
+		res = append(res, ints.Split(line, ""))
 	}
 
 	return res
@@ -28,12 +30,12 @@ func smallestRisk(risk [][]int) int {
 	}
 	totalRisk[0][0] = 0
 
-	points := map[util.Point]bool{
+	points := map[space.Point]bool{
 		{X: 0, Y: 0}: true,
 	}
 	for len(points) > 0 {
 		mr := math.MaxInt
-		p := util.Point{X: len(risk[0]), Y: len(risk)}
+		p := space.Point{X: len(risk[0]), Y: len(risk)}
 		for pp := range points {
 			if totalRisk[pp.Y][pp.X] < mr {
 				mr = totalRisk[pp.Y][pp.X]
@@ -44,7 +46,7 @@ func smallestRisk(risk [][]int) int {
 
 		cur := totalRisk[p.Y][p.X]
 
-		for _, dir := range []util.Point{{Y: -1}, {Y: 1}, {X: -1}, {X: 1}} {
+		for _, dir := range []space.Point{{Y: -1}, {Y: 1}, {X: -1}, {X: 1}} {
 			n := p.Add(dir)
 			if n.Y >= 0 && n.X >= 0 && n.Y < len(risk) && n.X < len(risk[n.Y]) &&
 				cur+risk[n.Y][n.X] < totalRisk[n.Y][n.X] {
@@ -54,7 +56,7 @@ func smallestRisk(risk [][]int) int {
 		}
 	}
 
-	end := util.Point{Y: len(risk) - 1}
+	end := space.Point{Y: len(risk) - 1}
 	end.X = len(risk[end.Y]) - 1
 
 	return totalRisk[end.Y][end.X]
@@ -79,9 +81,8 @@ func expand(risk [][]int) [][]int {
 }
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	risk := parse(filename)
 

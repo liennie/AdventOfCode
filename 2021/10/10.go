@@ -3,15 +3,14 @@ package main
 import (
 	"sort"
 
-	"github.com/liennie/AdventOfCode/common/load"
-	"github.com/liennie/AdventOfCode/common/log"
-	"github.com/liennie/AdventOfCode/common/util"
+	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/load"
+	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
 func main() {
-	defer util.Recover(log.Err)
-
-	const filename = "input.txt"
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
 
 	lines := load.Slice(filename)
 
@@ -50,7 +49,7 @@ lines:
 				}
 				stack = stack[:len(stack)-1]
 			default:
-				util.Panic("Invalid rune %c", r)
+				evil.Panic("Invalid rune %c", r)
 			}
 		}
 

@@ -1,4 +1,4 @@
-package util
+package evil
 
 import (
 	"fmt"
