@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/liennie/AdventOfCode/pkg/evil"
-	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 )
@@ -22,7 +21,7 @@ func countIncreases(filename string, window int) int {
 	i := 0
 	prev := int(^uint(0) >> 1)
 	for line := range load.File(filename) {
-		n := ints.Atoi(line)
+		n := evil.Atoi(line)
 		buf[i%window] = n
 
 		if i >= (window - 1) {

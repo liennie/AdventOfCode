@@ -4,7 +4,6 @@ import (
 	"math"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
-	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 	"github.com/liennie/AdventOfCode/pkg/space"
@@ -14,7 +13,7 @@ func parse(filename string) [][]int {
 	res := [][]int{}
 
 	for line := range load.File(filename) {
-		res = append(res, ints.Split(line, ""))
+		res = append(res, evil.Split(line, ""))
 	}
 
 	return res

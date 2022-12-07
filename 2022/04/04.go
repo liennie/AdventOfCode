@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
-	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 )
@@ -26,12 +25,12 @@ func parse(filename string) [][2]assignment {
 	for line := range load.File(filename) {
 		a, b, _ := strings.Cut(line, ",")
 
-		aa := ints.SplitN(a, "-", 2)
+		aa := evil.SplitN(a, "-", 2)
 		if len(aa) != 2 || aa[0] > aa[1] {
 			evil.Panic("Invalid assignment %s", a)
 		}
 
-		ba := ints.SplitN(b, "-", 2)
+		ba := evil.SplitN(b, "-", 2)
 		if len(ba) != 2 || ba[0] > ba[1] {
 			evil.Panic("Invalid assignment %s", b)
 		}

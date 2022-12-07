@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
-	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 	"github.com/liennie/AdventOfCode/pkg/space"
@@ -86,7 +85,7 @@ func parse(filename string) []scanner {
 				break
 			}
 
-			coords := ints.SplitN(line, ",", 3)
+			coords := evil.SplitN(line, ",", 3)
 			scanner.beacons = append(scanner.beacons, space.Point3{
 				X: coords[0],
 				Y: coords[1],

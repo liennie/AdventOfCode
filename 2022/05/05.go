@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
-	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 	"golang.org/x/exp/slices"
@@ -77,9 +76,9 @@ func parse(filename string) ([]stack, []step) {
 		from, to, _ := strings.Cut(line, " to ")
 
 		steps = append(steps, step{
-			count: ints.Atoi(count),
-			from:  ints.Atoi(from) - 1,
-			to:    ints.Atoi(to) - 1,
+			count: evil.Atoi(count),
+			from:  evil.Atoi(from) - 1,
+			to:    evil.Atoi(to) - 1,
 		})
 	}
 

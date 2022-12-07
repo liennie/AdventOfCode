@@ -104,7 +104,7 @@ func parse(filename string) []step {
 
 		for _, c := range strings.SplitN(line, ",", 3) {
 			p := strings.SplitN(c, "=", 2)
-			m := ints.SplitN(p[1], "..", 2)
+			m := evil.SplitN(p[1], "..", 2)
 
 			switch p[0] {
 			case "x":

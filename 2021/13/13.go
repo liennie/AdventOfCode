@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
-	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 	"github.com/liennie/AdventOfCode/pkg/space"
@@ -20,7 +19,7 @@ func parse(filename string) ([][]bool, []space.Point) {
 		if line == "" {
 			break
 		}
-		coords := ints.SplitN(line, ",", 2)
+		coords := evil.SplitN(line, ",", 2)
 		p := space.Point{
 			X: coords[0],
 			Y: coords[1],
@@ -47,9 +46,9 @@ func parse(filename string) ([][]bool, []space.Point) {
 		fold := strings.SplitN(strings.TrimPrefix(line, "fold along "), "=", 2)
 		switch fold[0] {
 		case "x":
-			folds = append(folds, space.Point{X: ints.Atoi(fold[1])})
+			folds = append(folds, space.Point{X: evil.Atoi(fold[1])})
 		case "y":
-			folds = append(folds, space.Point{Y: ints.Atoi(fold[1])})
+			folds = append(folds, space.Point{Y: evil.Atoi(fold[1])})
 		}
 	}
 

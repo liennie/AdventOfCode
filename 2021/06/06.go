@@ -11,7 +11,7 @@ import (
 func parse(filename string) []int {
 	ch := load.File(filename)
 	defer channel.Drain(ch)
-	return ints.Split(<-ch, ",")
+	return evil.Split(<-ch, ",")
 }
 
 func main() {

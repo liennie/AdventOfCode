@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
-	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 )
@@ -186,7 +185,7 @@ func parse(filename string) []instruction {
 				if a.reg {
 					evil.Panic("Instruction %s needs a register as arg %d", p[0], i)
 				}
-				a.v = ints.Atoi(p[i+1])
+				a.v = evil.Atoi(p[i+1])
 			}
 			inst.args[i] = a
 		}

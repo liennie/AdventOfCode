@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
-	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 )
@@ -90,7 +89,7 @@ func (b *board) reset() {
 func parseLine(line string) []int {
 	res := make([]int, 5)
 	for i := 0; i < 5; i++ {
-		res[i] = ints.Atoi(strings.TrimSpace(line[i*3 : i*3+2]))
+		res[i] = evil.Atoi(strings.TrimSpace(line[i*3 : i*3+2]))
 	}
 	return res
 }
@@ -98,7 +97,7 @@ func parseLine(line string) []int {
 func parse(filename string) ([]int, []board) {
 	ch := load.File(filename)
 
-	numbers := ints.Split(<-ch, ",")
+	numbers := evil.Split(<-ch, ",")
 	<-ch // Empty line
 
 	boards := []board{}

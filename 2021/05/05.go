@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
-	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 	"github.com/liennie/AdventOfCode/pkg/space"
@@ -31,8 +30,8 @@ func parse(filename string) []line {
 
 	for l := range load.File(filename) {
 		points := strings.SplitN(l, " -> ", 2)
-		start := ints.SplitN(points[0], ",", 2)
-		end := ints.SplitN(points[1], ",", 2)
+		start := evil.SplitN(points[0], ",", 2)
+		end := evil.SplitN(points[1], ",", 2)
 
 		res = append(res, line{
 			start: space.Point{

@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
-	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 )
@@ -13,8 +12,8 @@ import (
 func parse(filename string) (int, int) {
 	ch := load.File(filename)
 
-	return ints.Atoi(strings.TrimPrefix(<-ch, "Player 1 starting position: ")),
-		ints.Atoi(strings.TrimPrefix(<-ch, "Player 2 starting position: "))
+	return evil.Atoi(strings.TrimPrefix(<-ch, "Player 1 starting position: ")),
+		evil.Atoi(strings.TrimPrefix(<-ch, "Player 2 starting position: "))
 }
 
 type deterministicDie struct {

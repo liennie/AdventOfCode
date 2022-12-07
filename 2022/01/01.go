@@ -28,7 +28,7 @@ func parse(filename string) []inventory {
 			last = &res[len(res)-1]
 		}
 
-		last.calories = append(last.calories, ints.Atoi(line))
+		last.calories = append(last.calories, evil.Atoi(line))
 	}
 
 	return res

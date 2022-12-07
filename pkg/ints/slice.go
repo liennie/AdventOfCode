@@ -1,8 +1,6 @@
 package ints
 
 import (
-	"strings"
-
 	"github.com/liennie/AdventOfCode/pkg/evil"
 )
 
@@ -38,12 +36,4 @@ func Uniq(ns []int) []int {
 	}
 
 	return res
-}
-
-func Split(s string, sep string) []int {
-	return SliceAtoi(strings.Split(s, sep))
-}
-
-func SplitN(s string, sep string, n int) []int {
-	return SliceAtoi(strings.SplitN(s, sep, n))
 }

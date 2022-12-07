@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
-	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 )
@@ -105,7 +104,7 @@ func parse(filename string) *dir {
 				if size == "dir" {
 					pwd[len(pwd)-1].c[name] = &dir{c: map[string]node{}}
 				} else {
-					pwd[len(pwd)-1].c[name] = &file{s: ints.Atoi(size)}
+					pwd[len(pwd)-1].c[name] = &file{s: evil.Atoi(size)}
 				}
 			}
 		}

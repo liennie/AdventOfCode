@@ -21,11 +21,11 @@ func parse(filename string) (space.Point, space.Point) {
 	var min, max space.Point
 	for _, coord := range coords {
 		if strings.HasPrefix(coord, "x=") {
-			rang := ints.SplitN(coord[2:], "..", 2)
+			rang := evil.SplitN(coord[2:], "..", 2)
 			min.X = ints.Min(rang[0], rang[1])
 			max.X = ints.Max(rang[0], rang[1])
 		} else {
-			rang := ints.SplitN(coord[2:], "..", 2)
+			rang := evil.SplitN(coord[2:], "..", 2)
 			min.Y = ints.Min(rang[0], rang[1])
 			max.Y = ints.Max(rang[0], rang[1])
 		}

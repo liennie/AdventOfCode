@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
-	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 )
@@ -15,13 +14,13 @@ func part1(filename string) (int, int) {
 	for line := range load.File(filename) {
 		switch {
 		case strings.HasPrefix(line, "forward"):
-			pos += ints.Atoi(line[len("forward")+1:])
+			pos += evil.Atoi(line[len("forward")+1:])
 
 		case strings.HasPrefix(line, "down"):
-			depth += ints.Atoi(line[len("down")+1:])
+			depth += evil.Atoi(line[len("down")+1:])
 
 		case strings.HasPrefix(line, "up"):
-			depth -= ints.Atoi(line[len("up")+1:])
+			depth -= evil.Atoi(line[len("up")+1:])
 		}
 	}
 
@@ -34,15 +33,15 @@ func part2(filename string) (int, int) {
 	for line := range load.File(filename) {
 		switch {
 		case strings.HasPrefix(line, "forward"):
-			forward := ints.Atoi(line[len("forward")+1:])
+			forward := evil.Atoi(line[len("forward")+1:])
 			pos += forward
 			depth += aim * forward
 
 		case strings.HasPrefix(line, "down"):
-			aim += ints.Atoi(line[len("down")+1:])
+			aim += evil.Atoi(line[len("down")+1:])
 
 		case strings.HasPrefix(line, "up"):
-			aim -= ints.Atoi(line[len("up")+1:])
+			aim -= evil.Atoi(line[len("up")+1:])
 		}
 	}
 

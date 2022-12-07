@@ -14,7 +14,7 @@ func parse(filename string) [][]int {
 	res := [][]int{}
 
 	for line := range load.File(filename) {
-		res = append(res, ints.Split(line, ""))
+		res = append(res, evil.Split(line, ""))
 	}
 
 	return res
