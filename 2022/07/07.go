@@ -130,4 +130,23 @@ func main() {
 		}
 	})
 	log.Part1(sum)
+
+	// Part 2
+	const total = 70000000
+	const needed = 30000000
+
+	threshold := needed - (total - root.size())
+	if threshold <= 0 {
+		util.Panic("no need to free up space")
+	}
+
+	min := total
+	foreach(root, func(n node) {
+		if n.isDir() {
+			if size := n.size(); size >= threshold && size < min {
+				min = size
+			}
+		}
+	})
+	log.Part2(min)
 }
