@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 )
@@ -12,19 +14,12 @@ type cpu struct {
 	x   int
 	clk int
 
-	preFunc  func(*cpu)
-	postFunc func(*cpu)
+	preFunc func(*cpu)
 }
 
 func (cpu *cpu) pre() {
 	if cpu.preFunc != nil {
 		cpu.preFunc(cpu)
-	}
-}
-
-func (cpu *cpu) post() {
-	if cpu.postFunc != nil {
-		cpu.postFunc(cpu)
 	}
 }
 
@@ -39,12 +34,10 @@ type addx struct {
 func (i addx) execute(cpu *cpu) {
 	cpu.pre()
 	cpu.clk++
-	cpu.post()
 
 	cpu.pre()
 	cpu.clk++
 	cpu.x += i.amt
-	cpu.post()
 }
 
 type noop struct{}
@@ -52,7 +45,6 @@ type noop struct{}
 func (noop) execute(cpu *cpu) {
 	cpu.pre()
 	cpu.clk++
-	cpu.post()
 }
 
 func parse(filename string) []instruction {
@@ -81,7 +73,7 @@ func main() {
 
 	// Part 1
 	signal := 0
-	cpu := &cpu{
+	c := &cpu{
 		x:   1,
 		clk: 1,
 
@@ -92,7 +84,31 @@ func main() {
 		},
 	}
 	for _, instruction := range instructions {
-		instruction.execute(cpu)
+		instruction.execute(c)
 	}
 	log.Part1(signal)
+
+	// Part 2
+	log.Part2("Drawing:")
+	crt := 0
+	c = &cpu{
+		x:   1,
+		clk: 1,
+
+		preFunc: func(cpu *cpu) {
+			if ints.Abs(cpu.x-crt) <= 1 {
+				fmt.Print("#")
+			} else {
+				fmt.Print(" ")
+			}
+			crt++
+			if crt == 40 {
+				fmt.Println()
+				crt = 0
+			}
+		},
+	}
+	for _, instruction := range instructions {
+		instruction.execute(c)
+	}
 }
