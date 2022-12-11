@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 	"golang.org/x/exp/slices"
@@ -56,6 +57,22 @@ type monkey struct {
 	items     []int
 	operation operation
 	test      test
+}
+
+func (m monkey) clone() monkey {
+	return monkey{
+		items:     slices.Clone(m.items),
+		operation: m.operation,
+		test:      m.test,
+	}
+}
+
+func cloneMonkeys(monkeys []monkey) []monkey {
+	res := make([]monkey, len(monkeys))
+	for i, monkey := range monkeys {
+		res[i] = monkey.clone()
+	}
+	return res
 }
 
 func parse(filename string) []monkey {
@@ -120,6 +137,7 @@ func main() {
 	filename := load.Filename()
 
 	monkeys := parse(filename)
+	clone := cloneMonkeys(monkeys)
 
 	// Part 1
 	activity := make([]int, len(monkeys))
@@ -136,4 +154,25 @@ func main() {
 	}
 	slices.SortFunc(activity, func(a, b int) bool { return a > b })
 	log.Part1(activity[0] * activity[1])
+
+	// Part 2
+	monkeys = clone
+	mod := 1
+	for _, monkey := range monkeys {
+		mod = ints.LCM(mod, monkey.test.div)
+	}
+	activity = make([]int, len(monkeys))
+	for i := 0; i < 10000; i++ {
+		for m, monkey := range monkeys {
+			for _, item := range monkey.items {
+				activity[m]++
+				item = monkey.operation.eval(item) % mod
+				next := monkey.test.next(item)
+				monkeys[next].items = append(monkeys[next].items, item)
+			}
+			monkeys[m].items = monkey.items[:0]
+		}
+	}
+	slices.SortFunc(activity, func(a, b int) bool { return a > b })
+	log.Part2(activity[0] * activity[1])
 }
