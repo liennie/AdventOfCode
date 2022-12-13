@@ -6,8 +6,8 @@ import (
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
+	"github.com/liennie/AdventOfCode/pkg/path"
 	"github.com/liennie/AdventOfCode/pkg/space"
-	"seehuhn.de/go/dijkstra"
 )
 
 func parse(filename string) ([][]int, space.Point, space.Point) {
@@ -35,30 +35,23 @@ func parse(filename string) ([][]int, space.Point, space.Point) {
 
 type graph struct {
 	heightmap [][]int
+	rev       bool
 }
 
-// Edge returns the outgoing edges of the given vertex.
-func (g graph) Edges(v space.Point) []space.Point {
-	res := []space.Point{}
+func (g graph) Edges(n space.Point) []path.Edge[space.Point] {
+	res := []path.Edge[space.Point]{}
 	for _, dir := range [...]space.Point{{1, 0}, {0, 1}, {-1, 0}, {0, -1}} {
-		n := v.Add(dir)
-		if n.Y < 0 || n.X < 0 || n.Y >= len(g.heightmap) || n.X >= len(g.heightmap[n.Y]) {
+		o := n.Add(dir)
+		if o.Y < 0 || o.X < 0 || o.Y >= len(g.heightmap) || o.X >= len(g.heightmap[o.Y]) {
 			continue
 		}
 
-		if g.heightmap[n.Y][n.X]-g.heightmap[v.Y][v.X] <= 1 {
-			res = append(res, n)
+		if (!g.rev && g.heightmap[o.Y][o.X]-g.heightmap[n.Y][n.X] <= 1) ||
+			(g.rev && g.heightmap[n.Y][n.X]-g.heightmap[o.Y][o.X] <= 1) {
+			res = append(res, path.Edge[space.Point]{Len: 1, To: o})
 		}
 	}
 	return res
-}
-
-func (g graph) Length(e space.Point) int {
-	return 1
-}
-
-func (g graph) To(e space.Point) space.Point {
-	return e
 }
 
 func main() {
@@ -68,9 +61,18 @@ func main() {
 	heightmap, start, end := parse(filename)
 
 	// Part 1
-	path, err := dijkstra.ShortestPath[space.Point, space.Point, int](graph{heightmap: heightmap}, start, end)
+	p, err := path.Shortest[space.Point](graph{heightmap: heightmap}, start, path.EndConst(end))
 	if err != nil {
-		evil.Panic("dijkstra error: %w", err)
+		evil.Panic("path error: %w", err)
 	}
-	log.Part1(len(path))
+	log.Part1(len(p) - 1)
+
+	// Part 2
+	p, err = path.Shortest[space.Point](graph{heightmap: heightmap, rev: true}, end, path.EndFunc[space.Point](func(n space.Point) bool {
+		return heightmap[n.Y][n.X] == 0
+	}))
+	if err != nil {
+		evil.Panic("path error: %w", err)
+	}
+	log.Part2(len(p) - 1)
 }
