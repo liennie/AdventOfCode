@@ -4,6 +4,7 @@ import (
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
+	"golang.org/x/exp/slices"
 )
 
 type value interface {
@@ -105,4 +106,20 @@ func main() {
 		}
 	}
 	log.Part1(sum)
+
+	// Part 2
+	all := []value{
+		list{list{integer(2)}},
+		list{list{integer(6)}},
+	}
+	for _, pair := range pairs {
+		all = append(all, pair[:]...)
+	}
+	slices.SortFunc(all, func(a, b value) bool { return a.compare(b) < 0 })
+	div1, ok1 := slices.BinarySearchFunc[value](all, integer(2), func(a, b value) int { return a.compare(b) })
+	div2, ok2 := slices.BinarySearchFunc[value](all, integer(6), func(a, b value) int { return a.compare(b) })
+	if !ok1 || !ok2 {
+		evil.Panic("Dividers not found")
+	}
+	log.Part2((div1 + 1) * (div2 + 1))
 }
