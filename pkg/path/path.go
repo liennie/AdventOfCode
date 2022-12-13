@@ -40,7 +40,7 @@ func EndConst[N comparable](e N) End[N] {
 
 var ErrNotFound = errors.New("path not found")
 
-func Shortest[N comparable](g Graph[N], start N, end End[N]) ([]N, error) {
+func Shortest[N comparable](g Graph[N], start N, end End[N]) ([]N, int, error) {
 	h := &pathHeap[N]{}
 	shortest := map[N]int{
 		start: 0,
@@ -60,7 +60,7 @@ func Shortest[N comparable](g Graph[N], start N, end End[N]) ([]N, error) {
 				path[i], path[j] = path[j], path[i]
 			}
 
-			return path, nil
+			return path, p.len, nil
 		}
 
 		for _, edge := range g.Edges(p.node) {
@@ -81,5 +81,5 @@ func Shortest[N comparable](g Graph[N], start N, end End[N]) ([]N, error) {
 		}
 	}
 
-	return nil, ErrNotFound
+	return nil, 0, ErrNotFound
 }

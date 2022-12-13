@@ -61,18 +61,18 @@ func main() {
 	heightmap, start, end := parse(filename)
 
 	// Part 1
-	p, err := path.Shortest[space.Point](graph{heightmap: heightmap}, start, path.EndConst(end))
+	_, p, err := path.Shortest[space.Point](graph{heightmap: heightmap}, start, path.EndConst(end))
 	if err != nil {
 		evil.Panic("path error: %w", err)
 	}
-	log.Part1(len(p) - 1)
+	log.Part1(p)
 
 	// Part 2
-	p, err = path.Shortest[space.Point](graph{heightmap: heightmap, rev: true}, end, path.EndFunc[space.Point](func(n space.Point) bool {
+	_, p, err = path.Shortest[space.Point](graph{heightmap: heightmap, rev: true}, end, path.EndFunc[space.Point](func(n space.Point) bool {
 		return heightmap[n.Y][n.X] == 0
 	}))
 	if err != nil {
 		evil.Panic("path error: %w", err)
 	}
-	log.Part2(len(p) - 1)
+	log.Part2(p)
 }
