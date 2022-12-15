@@ -53,9 +53,10 @@ func main() {
 	}
 
 	count := 0
+	start := space.Point{X: 500, Y: 0}
 sand:
 	for {
-		p := space.Point{X: 500, Y: 0}
+		p := start
 		for {
 			if np := p.Add(space.Point{Y: 1}); cave[np] == air {
 				p = np
@@ -71,6 +72,30 @@ sand:
 
 			if p.Y > bottom {
 				break sand
+			}
+		}
+	}
+	log.Part1(count)
+
+	// Part 2
+	floor := bottom + 2
+	for x := 500 - floor; x <= 500+floor; x++ {
+		cave[space.Point{X: x, Y: floor}] = rock
+	}
+
+	for cave[start] == air {
+		p := start
+		for {
+			if np := p.Add(space.Point{Y: 1}); cave[np] == air {
+				p = np
+			} else if np := p.Add(space.Point{X: -1, Y: 1}); cave[np] == air {
+				p = np
+			} else if np := p.Add(space.Point{X: 1, Y: 1}); cave[np] == air {
+				p = np
+			} else {
+				cave[p] = sand
+				count++
+				break
 			}
 		}
 	}
