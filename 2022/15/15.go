@@ -63,4 +63,39 @@ func main() {
 		}
 	}
 	log.Part1(rs.Len())
+
+	// Part 2
+	const max = 4000000
+lines:
+	for line := 0; line <= max; line++ {
+		rs := set.RangeSet{}
+		for _, sensor := range sensors {
+			d := sensor.beacon.Sub(sensor.pos).ManhattanLen()
+			h := ints.Abs(line - sensor.pos.Y)
+			rs.Add(set.Range{
+				Min: sensor.pos.X - d + h,
+				Max: sensor.pos.X + d - h,
+			})
+		}
+		rs.Clamp(set.Range{Min: 0, Max: max})
+
+		if rs.Len() < max+1 {
+			rem := set.RangeSet{}
+			rem.Add(set.Range{Min: 0, Max: max})
+			for o := range rs {
+				rem.Remove(o)
+			}
+			if len(rem) != 1 {
+				evil.Panic("oh no")
+			}
+			for r := range rem {
+				if r.Len() != 1 {
+					evil.Panic("oh no again")
+				}
+
+				log.Part2(4000000*r.Min + line)
+				break lines
+			}
+		}
+	}
 }

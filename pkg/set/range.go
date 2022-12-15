@@ -68,6 +68,28 @@ func (rs RangeSet) Remove(r Range) {
 	}
 }
 
+func (rs RangeSet) Clamp(r Range) {
+	overlaps := []Range{}
+	for o := range rs {
+		if r.Contains(o) {
+			// do nothing
+		} else if r.Overlaps(o) {
+			overlaps = append(overlaps, o)
+			delete(rs, o)
+		} else {
+			delete(rs, o)
+		}
+	}
+
+	for _, o := range overlaps {
+		rs[Range{
+			Min: ints.Max(r.Min, o.Min),
+			Max: ints.Min(r.Max, o.Max),
+		}] = struct{}{}
+	}
+
+}
+
 func (rs RangeSet) Len() int {
 	total := 0
 	for o := range rs {
