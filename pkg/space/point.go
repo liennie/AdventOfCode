@@ -33,3 +33,7 @@ func (p Point) Add(other Point) Point {
 func (p Point) Equals(other Point) bool {
 	return p.X == other.X && p.Y == other.Y
 }
+
+func (p Point) ManhattanLen() int {
+	return ints.Abs(p.X) + ints.Abs(p.Y)
+}
