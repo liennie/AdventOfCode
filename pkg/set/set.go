@@ -35,6 +35,14 @@ func (s Set[T]) Contains(items ...T) bool {
 	return true
 }
 
+func (s Set[T]) Clone() Set[T] {
+	res := make(Set[T], len(s))
+	for item := range s {
+		res.Add(item)
+	}
+	return res
+}
+
 func Intersection[T comparable](sets ...Set[T]) Set[T] {
 	if len(sets) == 0 {
 		return nil
