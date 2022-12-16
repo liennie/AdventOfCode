@@ -8,7 +8,6 @@ import (
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 	"github.com/liennie/AdventOfCode/pkg/path"
-	"github.com/liennie/AdventOfCode/pkg/set"
 )
 
 type valve struct {
@@ -68,82 +67,87 @@ func calculateDistances(valves map[string]*valve) {
 	}
 }
 
-func maximize(valves map[string]*valve, time int, cur string, closed set.String) int {
+func maximize(valves map[string]*valve, time int, cur string, closed []string) int {
 	max := 0
-	nextClosed := closed.Clone()
-	for c := range closed {
-		nextClosed.Remove(c)
+	for i, c := range closed {
+		if c == "" {
+			continue
+		}
+		closed[i] = ""
 
 		dist := dists[distKey{from: cur, to: c}]
 
 		rem := time - dist - 1
 		if rem < 0 {
+			closed[i] = c
 			continue
 		}
 
-		gain := (rem * valves[c].rate) + maximize(valves, rem, c, nextClosed)
+		gain := (rem * valves[c].rate) + maximize(valves, rem, c, closed)
 
 		if gain > max {
 			max = gain
 		}
 
-		nextClosed.Add(c)
+		closed[i] = c
 	}
 	return max
 }
 
-func maximize2(valves map[string]*valve, time1, time2 int, cur1, cur2 string, closed set.String) int {
-	max := 0
-	nextClosed := closed.Clone()
-	for c1 := range closed {
-		nextClosed.Remove(c1)
+type max2cachekey struct {
+	t1, t2 int
+	c1, c2 string
+	closed string
+}
 
-		if time1 == 26 {
-			log.Println(c1)
-		}
+var max2cache = map[max2cachekey]int{}
 
-		dist1 := dists[distKey{from: cur1, to: c1}]
+func maximize2(valves map[string]*valve, time1, time2 int, cur1, cur2 string, closed []string) (max int) {
+	if time1 < time2 {
+		time1, time2 = time2, time1
+		cur1, cur2 = cur2, cur1
+	}
+	m2key := max2cachekey{
+		t1: time1, t2: time2,
+		c1: cur1, c2: cur2,
+		closed: strings.Join(closed, ""),
+	}
+	if res, ok := max2cache[m2key]; ok {
+		return res
+	}
+	defer func() {
+		max2cache[m2key] = max
+	}()
 
-		rem1 := time1 - dist1 - 1
-		if rem1 < 0 {
-			continue
-		}
-
-		gain := (rem1 * valves[c1].rate) + maximize2(valves, rem1, time2, c1, cur2, nextClosed)
-
-		if gain > max {
-			max = gain
-		}
-
-		for c2 := range closed {
-			if c2 == c1 {
+	for i := 0; i < 2; i++ {
+		for i, c := range closed {
+			if c == "" {
 				continue
 			}
 
-			if time1 == 26 && time2 == 26 {
-				log.Println(c1, c2)
-			}
+			closed[i] = ""
 
-			nextClosed.Remove(c2)
+			dist := dists[distKey{from: cur1, to: c}]
 
-			dist2 := dists[distKey{from: cur2, to: c2}]
-
-			rem2 := time2 - dist2 - 1
-			if rem2 < 0 {
+			rem := time1 - dist - 1
+			if rem < 0 {
+				closed[i] = c
 				continue
 			}
 
-			gain := (rem1 * valves[c1].rate) + (rem2 * valves[c2].rate) + maximize2(valves, rem1, rem2, c1, c2, nextClosed)
+			gain := (rem * valves[c].rate) + maximize2(valves, time2, rem, cur2, c, closed)
 
 			if gain > max {
 				max = gain
 			}
 
-			nextClosed.Add(c2)
+			closed[i] = c
 		}
 
-		nextClosed.Add(c1)
+		time1, time2 = time2, time1
+		cur1, cur2 = cur2, cur1
 	}
+
 	return max
 }
 
@@ -155,10 +159,10 @@ func main() {
 	calculateDistances(valves)
 
 	// Part 1
-	closed := set.String{}
+	closed := []string{}
 	for key, valve := range valves {
 		if valve.rate > 0 {
-			closed.Add(key)
+			closed = append(closed, key)
 		}
 	}
 	log.Part1(maximize(valves, 30, "AA", closed))
