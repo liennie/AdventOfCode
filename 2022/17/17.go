@@ -49,18 +49,14 @@ func parse(filename string) []int {
 	return res
 }
 
-func main() {
-	defer evil.Recover(log.Err)
-	filename := load.Filename()
-
-	jetPattern := parse(filename)
-
-	// Part 1
+func simulate(jetPattern []int, amt int) int {
 	top := 0
+	topExtra := 0
 	tower := set.Set[space.Point]{}
 	ji := 0
 	ri := 0
-	for i := 0; i < 2022; i++ {
+
+	step := func() {
 		rpos := space.Point{X: 2, Y: top + 4}
 
 	fall:
@@ -93,5 +89,46 @@ func main() {
 		}
 		ri = (ri + 1) % len(rocks)
 	}
-	log.Part1(top)
+
+	type cacheKey struct {
+		ri int
+		ji int
+	}
+	type cacheValue struct {
+		i   int
+		top int
+	}
+	cache := map[cacheKey][]cacheValue{}
+
+	for i := 0; i < amt; i++ {
+		if cv, ok := cache[cacheKey{ri: ri, ji: ji}]; ok && len(cv) > 10 {
+			id := cv[len(cv)-1].i - cv[len(cv)-2].i
+			if i+id < amt {
+				td := cv[len(cv)-1].top - cv[len(cv)-2].top
+				c := (amt - i) / id
+				i += c * id
+				topExtra += c * td
+			}
+		} else {
+			cache[cacheKey{ri: ri, ji: ji}] = append(cache[cacheKey{ri: ri, ji: ji}], cacheValue{i: i, top: top})
+		}
+
+		if i < amt {
+			step()
+		}
+	}
+
+	return top + topExtra
+}
+
+func main() {
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
+
+	jetPattern := parse(filename)
+
+	// Part 1
+	log.Part1(simulate(jetPattern, 2022))
+	// Part 2
+	log.Part2(simulate(jetPattern, 1000000000000))
 }
