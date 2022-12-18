@@ -43,6 +43,15 @@ func (s Set[T]) Clone() Set[T] {
 	return res
 }
 
+func (s Set[T]) Pop() (T, bool) {
+	for item := range s {
+		delete(s, item)
+		return item, true
+	}
+	var zero T
+	return zero, false
+}
+
 func Intersection[T comparable](sets ...Set[T]) Set[T] {
 	if len(sets) == 0 {
 		return nil
