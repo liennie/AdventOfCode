@@ -37,3 +37,10 @@ func (p Point) Equals(other Point) bool {
 func (p Point) ManhattanLen() int {
 	return ints.Abs(p.X) + ints.Abs(p.Y)
 }
+
+func (p Point) Flip() Point {
+	return Point{
+		X: -p.X,
+		Y: -p.Y,
+	}
+}

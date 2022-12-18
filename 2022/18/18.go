@@ -50,8 +50,7 @@ func main() {
 	for _, cube := range cubes {
 		aabb = aabb.Add(cube)
 	}
-	aabb.Min = aabb.Min.Add(space.Point3{-1, -1, -1})
-	aabb.Max = aabb.Max.Add(space.Point3{1, 1, 1})
+	aabb = aabb.Expand(1)
 
 	ext := set.New[space.Point3]()
 	flood := set.New(aabb.Min)

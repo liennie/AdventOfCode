@@ -36,3 +36,10 @@ func (aabb AABB3) Contains(p Point3) bool {
 		p.Y >= aabb.Min.Y && p.Y <= aabb.Max.Y &&
 		p.Z >= aabb.Min.Z && p.Z <= aabb.Max.Z
 }
+
+func (aabb AABB3) Expand(n int) AABB3 {
+	return AABB3{
+		Min: aabb.Min.Add(Point3{-n, -n, -n}),
+		Max: aabb.Max.Add(Point3{n, n, n}),
+	}
+}
