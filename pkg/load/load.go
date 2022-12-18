@@ -47,6 +47,43 @@ func File(filename string) <-chan string {
 	return ch
 }
 
+func Blocks(filename string) <-chan (<-chan string) {
+	ch := make(chan (<-chan string))
+
+	go func() {
+		defer close(ch)
+
+		blank := true
+		var bch chan string
+
+		defer func() {
+			if bch != nil {
+				close(bch)
+			}
+		}()
+
+		callback(filename, func(line string) {
+			if line == "" {
+				if bch != nil {
+					close(bch)
+					bch = nil
+				}
+				blank = true
+				return
+			}
+
+			if blank {
+				bch = make(chan string)
+				ch <- bch
+				blank = false
+			}
+			bch <- line
+		})
+	}()
+
+	return ch
+}
+
 func Slice(filename string) []string {
 	res := []string{}
 

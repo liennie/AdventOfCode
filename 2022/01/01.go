@@ -14,21 +14,15 @@ type inventory struct {
 
 func parse(filename string) []inventory {
 	res := []inventory{}
-	add := true
-	var last *inventory
 
-	for line := range load.File(filename) {
-		if line == "" {
-			add = true
-			continue
-		}
-		if add {
-			add = false
-			res = append(res, inventory{})
-			last = &res[len(res)-1]
+	for block := range load.Blocks(filename) {
+		inv := inventory{}
+
+		for line := range block {
+			inv.calories = append(inv.calories, evil.Atoi(line))
 		}
 
-		last.calories = append(last.calories, evil.Atoi(line))
+		res = append(res, inv)
 	}
 
 	return res
