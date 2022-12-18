@@ -76,3 +76,18 @@ func List(filename string) *list.List {
 
 	return res
 }
+
+func Line(filename string) string {
+	file, err := os.Open(filename)
+	if err != nil {
+		evil.Panic("os.Open: %w", err)
+	}
+	defer file.Close()
+
+	l, err := bufio.NewReader(file).ReadString('\n')
+	if err != nil && err != io.EOF {
+		evil.Panic("ReadString: %w", err)
+	}
+
+	return strings.TrimSuffix(l, "\n")
+}
