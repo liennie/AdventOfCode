@@ -89,44 +89,52 @@ func parse(filename string) []blueprint {
 	return res
 }
 
-func maximize(bl blueprint, time int, res resources, prod resources) int {
-	buy := func(cost resources, np resources) int {
-		if np.ore > bl.max.ore ||
-			np.clay > bl.max.clay ||
-			np.obsidian > bl.max.obsidian {
-			return res.geode + time*prod.geode
+func maximize(bl blueprint, time int, res resources, prod resources) (max int) {
+	resWait := func(res int, cost int, prod int) int {
+		if res >= cost {
+			return 0
 		}
-
-		resWait := func(res int, cost int, prod int) int {
-			if res >= cost {
-				return 0
-			}
-			if prod == 0 {
-				return time + 1
-			}
-			return (cost-res-1)/prod + 1
+		if prod == 0 {
+			return time + 1
 		}
-
-		wait := ints.Max(
-			resWait(res.ore, cost.ore, prod.ore),
-			resWait(res.clay, cost.clay, prod.clay),
-			resWait(res.obsidian, cost.obsidian, prod.obsidian),
-			resWait(res.geode, cost.geode, prod.geode),
-		) + 1
-
-		if wait > time {
-			return res.geode + time*prod.geode
-		}
-
-		return maximize(bl, time-wait, res.add(prod.times(wait)).sub(cost), np)
+		return (cost-res-1)/prod + 1
 	}
 
-	return ints.Max(
-		buy(bl.ore, prod.add(resources{ore: 1})),
-		buy(bl.clay, prod.add(resources{clay: 1})),
-		buy(bl.obsidian, prod.add(resources{obsidian: 1})),
-		buy(bl.geode, prod.add(resources{geode: 1})),
-	)
+	max = res.geode + time*prod.geode
+
+	if prod.ore < bl.max.ore {
+		wait := resWait(res.ore, bl.ore.ore, prod.ore) + 1
+		if wait < time {
+			max = ints.Max(max, maximize(bl, time-wait, res.add(prod.times(wait)).sub(bl.ore), prod.add(resources{ore: 1})))
+		}
+	}
+
+	if prod.clay < bl.max.clay {
+		wait := resWait(res.ore, bl.clay.ore, prod.ore) + 1
+		if wait < time {
+			max = ints.Max(max, maximize(bl, time-wait, res.add(prod.times(wait)).sub(bl.clay), prod.add(resources{clay: 1})))
+		}
+	}
+
+	if prod.obsidian < bl.max.obsidian {
+		wait := ints.Max(
+			resWait(res.ore, bl.obsidian.ore, prod.ore),
+			resWait(res.clay, bl.obsidian.clay, prod.clay),
+		) + 1
+		if wait < time {
+			max = ints.Max(max, maximize(bl, time-wait, res.add(prod.times(wait)).sub(bl.obsidian), prod.add(resources{obsidian: 1})))
+		}
+	}
+
+	wait := ints.Max(
+		resWait(res.ore, bl.geode.ore, prod.ore),
+		resWait(res.obsidian, bl.geode.obsidian, prod.obsidian),
+	) + 1
+	if wait < time {
+		max = ints.Max(max, maximize(bl, time-wait, res.add(prod.times(wait)).sub(bl.geode), prod.add(resources{geode: 1})))
+	}
+
+	return max
 }
 
 func main() {
@@ -138,9 +146,16 @@ func main() {
 	// Part 1
 	total := 0
 	for _, bl := range blueprints {
-		log.Println(bl)
 		geodes := maximize(bl, 24, resources{}, resources{ore: 1})
 		total += geodes * bl.id
 	}
 	log.Part1(total)
+
+	// Part 2
+	prod := 1
+	for _, bl := range blueprints[:ints.Min(3, len(blueprints))] {
+		log.Println(bl)
+		prod *= maximize(bl, 32, resources{}, resources{ore: 1})
+	}
+	log.Part2(prod)
 }
