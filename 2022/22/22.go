@@ -110,6 +110,26 @@ func walk(mp map[space.Point]byte, inst []any, pos, d space.Point, warpMap map[w
 	return pos, d
 }
 
+func addWarps(warpMap map[warp]warp, from, d, to space.Point, rot, cnt int) {
+	ff := from
+	fd := d.Rot90(1)
+	tt := to
+	dd := d.Rot90(rot)
+	td := dd.Rot90(1)
+	for i := 0; i < cnt; i++ {
+		warpMap[warp{
+			pos: ff,
+			d:   d,
+		}] = warp{
+			pos: tt,
+			d:   dd,
+		}
+
+		ff = ff.Add(fd)
+		tt = tt.Add(td)
+	}
+}
+
 func main() {
 	defer evil.Recover(log.Err)
 	filename := load.Filename()
@@ -142,4 +162,45 @@ func main() {
 	}
 	pos, d := walk(mp, inst, start, space.Point{X: 1}, warpMap)
 	log.Part1((pos.Y+1)*1000 + (pos.X+1)*4 + dirVal(d))
+
+	// Part 2
+	if filename == "test.txt" {
+		warpMap = map[warp]warp{}
+		addWarps(warpMap, space.Point{11, 0}, space.Point{1, 0}, space.Point{15, 11}, 2, 4)
+		addWarps(warpMap, space.Point{11, 4}, space.Point{1, 0}, space.Point{15, 8}, 1, 4)
+		addWarps(warpMap, space.Point{12, 8}, space.Point{0, -1}, space.Point{11, 7}, -1, 4)
+		addWarps(warpMap, space.Point{15, 8}, space.Point{1, 0}, space.Point{11, 3}, 2, 4)
+
+		addWarps(warpMap, space.Point{15, 11}, space.Point{0, 1}, space.Point{0, 4}, -1, 4)
+		addWarps(warpMap, space.Point{11, 11}, space.Point{0, 1}, space.Point{0, 7}, 2, 4)
+		addWarps(warpMap, space.Point{8, 11}, space.Point{-1, 0}, space.Point{4, 8}, 1, 4)
+		addWarps(warpMap, space.Point{7, 7}, space.Point{0, 1}, space.Point{8, 8}, -1, 4)
+		addWarps(warpMap, space.Point{3, 7}, space.Point{0, 1}, space.Point{8, 11}, 2, 4)
+		addWarps(warpMap, space.Point{0, 7}, space.Point{-1, 0}, space.Point{12, 11}, 1, 4)
+
+		addWarps(warpMap, space.Point{0, 4}, space.Point{0, -1}, space.Point{11, 0}, 2, 4)
+		addWarps(warpMap, space.Point{4, 4}, space.Point{0, -1}, space.Point{8, 0}, 1, 4)
+		addWarps(warpMap, space.Point{8, 3}, space.Point{-1, 0}, space.Point{7, 4}, -1, 4)
+		addWarps(warpMap, space.Point{8, 0}, space.Point{0, -1}, space.Point{3, 4}, 2, 4)
+	} else {
+		warpMap = map[warp]warp{}
+		addWarps(warpMap, space.Point{149, 0}, space.Point{1, 0}, space.Point{99, 149}, 2, 50)
+		addWarps(warpMap, space.Point{149, 49}, space.Point{0, 1}, space.Point{99, 99}, 1, 50)
+		addWarps(warpMap, space.Point{99, 50}, space.Point{1, 0}, space.Point{100, 49}, -1, 50)
+		addWarps(warpMap, space.Point{99, 100}, space.Point{1, 0}, space.Point{149, 49}, 2, 50)
+
+		addWarps(warpMap, space.Point{99, 149}, space.Point{0, 1}, space.Point{49, 199}, 1, 50)
+		addWarps(warpMap, space.Point{49, 150}, space.Point{1, 0}, space.Point{50, 149}, -1, 50)
+
+		addWarps(warpMap, space.Point{49, 199}, space.Point{0, 1}, space.Point{149, 0}, 0, 50)
+		addWarps(warpMap, space.Point{0, 199}, space.Point{-1, 0}, space.Point{99, 0}, -1, 50)
+		addWarps(warpMap, space.Point{0, 149}, space.Point{-1, 0}, space.Point{50, 0}, 2, 50)
+		addWarps(warpMap, space.Point{0, 100}, space.Point{0, -1}, space.Point{50, 50}, 1, 50)
+		addWarps(warpMap, space.Point{50, 99}, space.Point{-1, 0}, space.Point{49, 100}, -1, 50)
+		addWarps(warpMap, space.Point{50, 49}, space.Point{-1, 0}, space.Point{0, 100}, 2, 50)
+		addWarps(warpMap, space.Point{50, 0}, space.Point{0, -1}, space.Point{0, 150}, 1, 50)
+		addWarps(warpMap, space.Point{100, 0}, space.Point{0, -1}, space.Point{0, 199}, 0, 50)
+	}
+	pos, d = walk(mp, inst, start, space.Point{X: 1}, warpMap)
+	log.Part2((pos.Y+1)*1000 + (pos.X+1)*4 + dirVal(d))
 }
