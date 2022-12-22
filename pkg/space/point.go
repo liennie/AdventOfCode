@@ -38,6 +38,14 @@ func (p Point) ManhattanLen() int {
 	return ints.Abs(p.X) + ints.Abs(p.Y)
 }
 
+func (p Point) Rot90(s int) Point {
+	s = ints.Mod(s, 4)
+	for i := 0; i < s; i++ {
+		p.Y, p.X = p.X, -p.Y
+	}
+	return p
+}
+
 func (p Point) Flip() Point {
 	return Point{
 		X: -p.X,
