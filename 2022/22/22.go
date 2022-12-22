@@ -62,40 +62,31 @@ func dirVal(d space.Point) int {
 	return 0
 }
 
-func main() {
-	defer evil.Recover(log.Err)
-	filename := load.Filename()
+type warp struct {
+	pos, d space.Point
+}
 
-	mp, inst := parse(filename)
-	var pos space.Point
-	for x := 0; x <= 10000; x++ {
-		if x == 10000 {
-			evil.Panic("Start not found")
-		}
-		if mp[space.Point{X: x}] == '.' {
-			pos.X = x
-			break
-		}
-	}
-	d := space.Point{X: 1}
-
-	// Part 1
+func walk(mp map[space.Point]byte, inst []any, pos, d space.Point, warpMap map[warp]warp) (space.Point, space.Point) {
 	for _, i := range inst {
 		switch i := i.(type) {
 		case int:
 			for n := 0; n < i; n++ {
-				next := pos.Add(d)
-				t, ok := mp[next]
+				nextPos := pos.Add(d)
+				nextD := d
+				t, ok := mp[nextPos]
 				if !ok {
-					nd := d.Flip()
-					for warp := pos; mp[warp] != 0; warp = warp.Add(nd) {
-						next = warp
+					w, ok := warpMap[warp{pos: pos, d: d}]
+					if !ok {
+						evil.Panic("Oh no")
 					}
-					t = mp[next]
+					nextPos = w.pos
+					nextD = w.d
+					t = mp[nextPos]
 				}
 
 				if t == '.' {
-					pos = next
+					pos = nextPos
+					d = nextD
 				} else {
 					break
 				}
@@ -115,5 +106,40 @@ func main() {
 			evil.Panic("Invalid %T", i)
 		}
 	}
+
+	return pos, d
+}
+
+func main() {
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
+
+	mp, inst := parse(filename)
+	var start space.Point
+	for x := 0; x <= 10000; x++ {
+		if x == 10000 {
+			evil.Panic("Start not found")
+		}
+		if mp[space.Point{X: x}] == '.' {
+			start.X = x
+			break
+		}
+	}
+
+	// Part 1
+	warpMap := map[warp]warp{}
+	for pos := range mp {
+		for _, d := range [...]space.Point{{X: 1}, {Y: 1}, {X: -1}, {Y: -1}} {
+			next := pos.Add(d)
+			if _, ok := mp[next]; !ok {
+				nd := d.Flip()
+				for warp := pos; mp[warp] != 0; warp = warp.Add(nd) {
+					next = warp
+				}
+				warpMap[warp{pos: pos, d: d}] = warp{pos: next, d: d}
+			}
+		}
+	}
+	pos, d := walk(mp, inst, start, space.Point{X: 1}, warpMap)
 	log.Part1((pos.Y+1)*1000 + (pos.X+1)*4 + dirVal(d))
 }
