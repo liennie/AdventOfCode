@@ -5,19 +5,25 @@ import (
 )
 
 type AABB struct {
-	Min Point
-	Max Point
+	Valid bool
+	Min   Point
+	Max   Point
 }
 
-func NewAABB(p Point) AABB {
-	return AABB{
-		Min: p,
-		Max: p,
+func NewAABB(points ...Point) AABB {
+	aabb := AABB{}
+	for _, p := range points {
+		aabb = aabb.Add(p)
 	}
+	return aabb
 }
 
-func (aabb AABB) Add(p Point3) AABB {
+func (aabb AABB) Add(p Point) AABB {
+	if !aabb.Valid {
+		return AABB{Valid: true, Min: p, Max: p}
+	}
 	return AABB{
+		Valid: true,
 		Min: Point{
 			X: ints.Min(aabb.Min.X, p.X),
 			Y: ints.Min(aabb.Min.Y, p.Y),
@@ -30,13 +36,18 @@ func (aabb AABB) Add(p Point3) AABB {
 }
 
 func (aabb AABB) Contains(p Point) bool {
-	return p.X >= aabb.Min.X && p.X <= aabb.Max.X &&
+	return aabb.Valid &&
+		p.X >= aabb.Min.X && p.X <= aabb.Max.X &&
 		p.Y >= aabb.Min.Y && p.Y <= aabb.Max.Y
 }
 
 func (aabb AABB) Expand(n int) AABB {
+	if !aabb.Valid {
+		return aabb
+	}
 	return AABB{
-		Min: aabb.Min.Add(Point{-n, -n}),
-		Max: aabb.Max.Add(Point{n, n}),
+		Valid: true,
+		Min:   aabb.Min.Add(Point{-n, -n}),
+		Max:   aabb.Max.Add(Point{n, n}),
 	}
 }

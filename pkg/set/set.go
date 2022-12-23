@@ -35,6 +35,15 @@ func (s Set[T]) Contains(items ...T) bool {
 	return true
 }
 
+func (s Set[T]) Intersects(items ...T) bool {
+	for _, item := range items {
+		if _, ok := s[item]; ok {
+			return true
+		}
+	}
+	return false
+}
+
 func (s Set[T]) Clone() Set[T] {
 	res := make(Set[T], len(s))
 	for item := range s {
