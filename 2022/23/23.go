@@ -22,13 +22,7 @@ func parse(filename string) set.Set[space.Point] {
 	return res
 }
 
-func main() {
-	defer evil.Recover(log.Err)
-	filename := load.Filename()
-
-	elves := parse(filename)
-
-	// Part 1
+func sim(elves set.Set[space.Point], limit int) (set.Set[space.Point], int) {
 	dirs := [...][3]space.Point{
 		{{Y: -1}, {Y: -1, X: -1}, {Y: -1, X: 1}},
 		{{Y: 1}, {Y: 1, X: -1}, {Y: 1, X: 1}},
@@ -36,7 +30,9 @@ func main() {
 		{{X: 1}, {X: 1, Y: -1}, {X: 1, Y: 1}},
 	}
 	dirIndex := 0
-	for m := 0; m < 10; m++ {
+
+	m := 0
+	for ; limit < 0 || m < limit; m++ {
 		proposed := map[space.Point]space.Point{}
 		propCount := map[space.Point]int{}
 		for elf := range elves {
@@ -71,7 +67,10 @@ func main() {
 					break
 				}
 			}
+		}
 
+		if len(propCount) == 0 {
+			break
 		}
 
 		elves = set.New[space.Point]()
@@ -85,17 +84,35 @@ func main() {
 
 		dirIndex++
 	}
+
+	return elves, m
+}
+
+func main() {
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
+
+	elves := parse(filename)
+
+	// Part 1
+	elves10, _ := sim(elves, 10)
+
 	aabb := space.AABB{}
-	for elf := range elves {
+	for elf := range elves10 {
 		aabb = aabb.Add(elf)
 	}
+
 	count := 0
 	for x := aabb.Min.X; x <= aabb.Max.X; x++ {
 		for y := aabb.Min.Y; y <= aabb.Max.Y; y++ {
-			if !elves.Contains(space.Point{X: x, Y: y}) {
+			if !elves10.Contains(space.Point{X: x, Y: y}) {
 				count++
 			}
 		}
 	}
 	log.Part1(count)
+
+	// Part 2
+	_, moves := sim(elves, -1)
+	log.Part2(moves + 1)
 }
