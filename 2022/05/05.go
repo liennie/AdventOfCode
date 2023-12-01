@@ -3,10 +3,11 @@ package main
 import (
 	"strings"
 
+	"slices"
+
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
-	"golang.org/x/exp/slices"
 )
 
 type stack struct {

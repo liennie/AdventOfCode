@@ -72,6 +72,7 @@ func Shortest[N comparable](g Graph[N], start N, end End[N]) ([]N, int, error) {
 				}
 			}
 
+			// TODO delete prev path from heap
 			shortest[edge.To] = l
 			heap.Push(h, &path[N]{
 				len:  l,

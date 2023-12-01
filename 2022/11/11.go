@@ -1,13 +1,15 @@
 package main
 
 import (
+	"cmp"
 	"strings"
+
+	"slices"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
-	"golang.org/x/exp/slices"
 )
 
 type operation struct {
@@ -152,7 +154,7 @@ func main() {
 			monkeys[m].items = monkey.items[:0]
 		}
 	}
-	slices.SortFunc(activity, func(a, b int) bool { return a > b })
+	slices.SortFunc(activity, func(a, b int) int { return cmp.Compare(b, a) })
 	log.Part1(activity[0] * activity[1])
 
 	// Part 2
@@ -173,6 +175,6 @@ func main() {
 			monkeys[m].items = monkey.items[:0]
 		}
 	}
-	slices.SortFunc(activity, func(a, b int) bool { return a > b })
+	slices.SortFunc(activity, func(a, b int) int { return cmp.Compare(b, a) })
 	log.Part2(activity[0] * activity[1])
 }

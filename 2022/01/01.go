@@ -1,11 +1,13 @@
 package main
 
 import (
+	"cmp"
+	"slices"
+
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
-	"golang.org/x/exp/slices"
 )
 
 type inventory struct {
@@ -39,7 +41,7 @@ func main() {
 	for _, inv := range invs {
 		sums = append(sums, ints.Sum(inv.calories...))
 	}
-	slices.SortFunc(sums, func(a, b int) bool { return a > b })
+	slices.SortFunc(sums, func(a, b int) int { return cmp.Compare(b, a) })
 
 	log.Part1(sums[0])
 

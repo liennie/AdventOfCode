@@ -1,7 +1,8 @@
 package set
 
 import (
-	"golang.org/x/exp/slices"
+	"cmp"
+	"slices"
 )
 
 type Set[T comparable] map[T]struct{}
@@ -66,7 +67,7 @@ func Intersection[T comparable](sets ...Set[T]) Set[T] {
 		return nil
 	}
 
-	slices.SortFunc(sets, func(a, b Set[T]) bool { return len(a) < len(b) })
+	slices.SortFunc(sets, func(a, b Set[T]) int { return cmp.Compare(len(a), len(b)) })
 
 	res := make(Set[T], len(sets[0]))
 items:
