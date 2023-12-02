@@ -64,6 +64,25 @@ games:
 
 		sum += id
 	}
-
 	log.Part1(sum)
+
+	// Part 2
+	sum = 0
+	for _, game := range games {
+		min := Cubes{}
+
+		for _, turn := range game {
+			for color, amt := range turn {
+				min[color] = max(min[color], amt)
+			}
+		}
+
+		pow := 1
+		for _, amt := range min {
+			pow *= amt
+		}
+
+		sum += pow
+	}
+	log.Part2(sum)
 }
