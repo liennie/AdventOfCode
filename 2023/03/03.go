@@ -84,4 +84,26 @@ numbers:
 		}
 	}
 	log.Part1(sum)
+
+	// Part 2
+	sum = 0
+	for _, symbol := range symbols {
+		if symbol.symbol != '*' {
+			continue
+		}
+
+		prod := 1
+		cnt := 0
+		for _, number := range numbers {
+			if number.pos.Expand(1).Contains(symbol.pos) {
+				prod *= number.num
+				cnt++
+			}
+		}
+
+		if cnt == 2 {
+			sum += prod
+		}
+	}
+	log.Part2(sum)
 }
