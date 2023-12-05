@@ -18,6 +18,13 @@ func (r Range) Overlaps(other Range) bool {
 	return r.Max >= other.Min && r.Min <= other.Max
 }
 
+func (r Range) Intersection(other Range) Range {
+	return Range{
+		Min: max(r.Min, other.Min),
+		Max: min(r.Max, other.Max),
+	}
+}
+
 func (r Range) Len() int {
 	return r.Max - r.Min + 1
 }
@@ -100,4 +107,12 @@ func (rs RangeSet) Len() int {
 		total += o.Len()
 	}
 	return total
+}
+
+func (rs RangeSet) Clone() RangeSet {
+	res := RangeSet{}
+	for r, v := range rs {
+		res[r] = v
+	}
+	return res
 }

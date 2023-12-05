@@ -63,12 +63,11 @@ func main() {
 	min := math.MaxInt
 	for _, seed := range seeds {
 		num := seed
-	maps:
 		for _, m := range maps {
 			for r, start := range m {
 				if r.Contains(num) {
 					num = start + num - r.Min
-					continue maps
+					break
 				}
 			}
 		}
@@ -78,4 +77,39 @@ func main() {
 		}
 	}
 	log.Part1(min)
+
+	// Part 2
+	seedSet := set.RangeSet{}
+	for i := 1; i < len(seeds); i += 2 {
+		seedSet.Add(set.Range{Min: seeds[i-1], Max: seeds[i-1] + seeds[i] - 1})
+	}
+
+	numSet := seedSet
+	for _, m := range maps {
+		rem := numSet.Clone()
+		next := set.RangeSet{}
+		for seedRange := range numSet {
+			for r, start := range m {
+				i := seedRange.Intersection(r)
+				if i.Len() > 0 {
+					rem.Remove(i)
+					next.Add(set.Range{
+						Min: start + i.Min - r.Min,
+						Max: start + i.Max - r.Min,
+					})
+				}
+			}
+		}
+		for r := range rem {
+			next.Add(r)
+		}
+		numSet = next
+	}
+	min = math.MaxInt
+	for r := range numSet {
+		if r.Min < min {
+			min = r.Min
+		}
+	}
+	log.Part2(min)
 }
