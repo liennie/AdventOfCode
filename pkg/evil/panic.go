@@ -1,6 +1,7 @@
 package evil
 
 import (
+	"errors"
 	"fmt"
 	"runtime/debug"
 )
@@ -9,9 +10,9 @@ func Panic(format string, a ...interface{}) {
 	panic(fmt.Errorf(format, a...))
 }
 
-func Assert(ok bool, msg string) {
+func Assert(ok bool, a ...any) {
 	if !ok {
-		panic(fmt.Errorf("%s", msg))
+		panic(errors.New(fmt.Sprint(a...)))
 	}
 }
 

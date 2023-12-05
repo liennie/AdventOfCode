@@ -6,8 +6,12 @@ type Range struct {
 	Min, Max int
 }
 
-func (r Range) Contains(other Range) bool {
+func (r Range) ContainsRange(other Range) bool {
 	return r.Min <= other.Min && r.Max >= other.Max
+}
+
+func (r Range) Contains(other int) bool {
+	return r.Min <= other && r.Max >= other
 }
 
 func (r Range) Overlaps(other Range) bool {
@@ -71,7 +75,7 @@ func (rs RangeSet) Remove(r Range) {
 func (rs RangeSet) Clamp(r Range) {
 	overlaps := []Range{}
 	for o := range rs {
-		if r.Contains(o) {
+		if r.ContainsRange(o) {
 			// do nothing
 		} else if r.Overlaps(o) {
 			overlaps = append(overlaps, o)
