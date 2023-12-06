@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
@@ -47,4 +48,20 @@ func main() {
 		prod *= cnt
 	}
 	log.Part1(prod)
+
+	// Part 2
+	race := races[0]
+	for i := 1; i < len(races); i++ {
+		race.time = evil.Atoi(strconv.Itoa(race.time) + strconv.Itoa(races[i].time))
+		race.distance = evil.Atoi(strconv.Itoa(race.distance) + strconv.Itoa(races[i].distance))
+	}
+
+	cnt := 0
+	for n := 0; n < race.time; n++ {
+		dist := n * (race.time - n)
+		if dist > race.distance {
+			cnt++
+		}
+	}
+	log.Part2(cnt)
 }
