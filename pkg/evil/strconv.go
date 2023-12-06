@@ -28,3 +28,7 @@ func Split(s string, sep string) []int {
 func SplitN(s string, sep string, n int) []int {
 	return SliceAtoi(strings.SplitN(s, sep, n))
 }
+
+func Fields(s string) []int {
+	return SliceAtoi(strings.Fields(s))
+}
