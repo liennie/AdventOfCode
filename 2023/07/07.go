@@ -47,28 +47,38 @@ func getType(cards [5]int, joker bool) int {
 	for _, c := range cards {
 		cardCnt[c]++
 	}
-
-	have := make([]int, 6)
-	haveWithoutJokers := make([]int, 6)
-	for i, cnt := range cardCnt {
-		have[cnt]++
-		if i > 0 {
-			haveWithoutJokers[cnt]++
+	if joker {
+		max := 0
+		maxi := 0
+		for i, cnt := range cardCnt {
+			if i > 0 && cnt > max {
+				max = cnt
+				maxi = i
+			}
+		}
+		if maxi > 0 {
+			cardCnt[maxi] += cardCnt[0]
+			cardCnt[0] = 0
 		}
 	}
 
+	have := make([]int, 6)
+	for _, cnt := range cardCnt {
+		have[cnt]++
+	}
+
 	switch {
-	case have[5] == 1 || (joker && haveWithoutJokers[5-cardCnt[0]] >= 1):
+	case have[5] == 1:
 		return fiveOfAKind
-	case have[4] == 1 || (joker && haveWithoutJokers[4-cardCnt[0]] >= 1):
+	case have[4] == 1:
 		return fourOfAKind
-	case (have[3] == 1 && have[2] == 1) || (joker && haveWithoutJokers[2] == 2 && cardCnt[0] == 1): // full house is only worth making from a two pair
+	case have[3] == 1 && have[2] == 1:
 		return fullHouse
-	case have[3] == 1 || (joker && haveWithoutJokers[3-cardCnt[0]] >= 1):
+	case have[3] == 1:
 		return threeOfAKind
-	case have[2] == 2: // using jokers to make two pairs is a waste
+	case have[2] == 2:
 		return twoPair
-	case have[2] == 1 || (joker && haveWithoutJokers[2-cardCnt[0]] >= 1):
+	case have[2] == 1:
 		return onePair
 	default:
 		return highCard
@@ -119,7 +129,7 @@ func main() {
 	}
 	log.Part1(sum)
 
-	// Part 1
+	// Part 2
 	hands = parse(filename, cardLabels2, true)
 	slices.SortFunc(hands, func(a, b Hand) int { return a.compare(b) })
 	sum = 0
