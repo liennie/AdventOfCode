@@ -10,7 +10,8 @@ import (
 	"github.com/liennie/AdventOfCode/pkg/log"
 )
 
-var cardLabels = []byte{'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'}
+var cardLabels1 = []byte{'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'}
+var cardLabels2 = []byte{'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A'}
 
 const (
 	unknown = iota
@@ -41,36 +42,40 @@ func (h Hand) compare(other Hand) int {
 	return 0
 }
 
-func getType(cards [5]int) int {
-	cardCnt := make([]int, len(cardLabels))
+func getType(cards [5]int, joker bool) int {
+	cardCnt := make([]int, len(cardLabels1))
 	for _, c := range cards {
 		cardCnt[c]++
 	}
 
 	have := make([]int, 6)
-	for _, cnt := range cardCnt {
+	haveWithoutJokers := make([]int, 6)
+	for i, cnt := range cardCnt {
 		have[cnt]++
+		if i > 0 {
+			haveWithoutJokers[cnt]++
+		}
 	}
 
 	switch {
-	case have[5] == 1:
+	case have[5] == 1 || (joker && haveWithoutJokers[5-cardCnt[0]] >= 1):
 		return fiveOfAKind
-	case have[4] == 1:
+	case have[4] == 1 || (joker && haveWithoutJokers[4-cardCnt[0]] >= 1):
 		return fourOfAKind
-	case have[3] == 1 && have[2] == 1:
+	case (have[3] == 1 && have[2] == 1) || (joker && haveWithoutJokers[2] == 2 && cardCnt[0] == 1): // full house is only worth making from a two pair
 		return fullHouse
-	case have[3] == 1:
+	case have[3] == 1 || (joker && haveWithoutJokers[3-cardCnt[0]] >= 1):
 		return threeOfAKind
-	case have[2] == 2:
+	case have[2] == 2: // using jokers to make two pairs is a waste
 		return twoPair
-	case have[2] == 1:
+	case have[2] == 1 || (joker && haveWithoutJokers[2-cardCnt[0]] >= 1):
 		return onePair
 	default:
 		return highCard
 	}
 }
 
-func parse(filename string) []Hand {
+func parse(filename string, cardLabels []byte, joker bool) []Hand {
 	res := []Hand{}
 
 	for line := range load.File(filename) {
@@ -93,7 +98,7 @@ func parse(filename string) []Hand {
 
 		res = append(res, Hand{
 			cards: cards,
-			typ:   getType(cards),
+			typ:   getType(cards, joker),
 			bid:   bid,
 		})
 	}
@@ -105,13 +110,21 @@ func main() {
 	defer evil.Recover(log.Err)
 	filename := load.Filename()
 
-	hands := parse(filename)
-
 	// Part 1
+	hands := parse(filename, cardLabels1, false)
 	slices.SortFunc(hands, func(a, b Hand) int { return a.compare(b) })
 	sum := 0
 	for i, hand := range hands {
 		sum += hand.bid * (i + 1)
 	}
 	log.Part1(sum)
+
+	// Part 1
+	hands = parse(filename, cardLabels2, true)
+	slices.SortFunc(hands, func(a, b Hand) int { return a.compare(b) })
+	sum = 0
+	for i, hand := range hands {
+		sum += hand.bid * (i + 1)
+	}
+	log.Part2(sum)
 }
