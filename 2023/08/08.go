@@ -2,8 +2,10 @@ package main
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 )
@@ -54,28 +56,69 @@ func main() {
 	dirs, nodes := parse(filename)
 
 	// Part 1
-	cur := "AAA"
-	cnt := 0
-	dirIdx := 0
-	for cur != "ZZZ" {
-		dir := dirs[dirIdx]
-		dirIdx++
-		if dirIdx == len(dirs) {
-			dirIdx = 0
-		}
+	if _, ok := nodes["AAA"]; ok {
+		cur := "AAA"
+		cnt := 0
+		dirIdx := 0
+		for cur != "ZZZ" {
+			dir := dirs[dirIdx]
+			dirIdx++
+			if dirIdx == len(dirs) {
+				dirIdx = 0
+			}
 
-		node, ok := nodes[cur]
-		evil.Assert(ok, "missing node ", cur)
+			node, ok := nodes[cur]
+			evil.Assert(ok, "missing node ", cur)
 
-		switch dir {
-		case Left:
-			cur = node.left
-		case Right:
-			cur = node.right
-		default:
-			evil.Panic("invalid dir %d", dir)
+			switch dir {
+			case Left:
+				cur = node.left
+			case Right:
+				cur = node.right
+			default:
+				evil.Panic("invalid dir %d", dir)
+			}
+			cnt++
 		}
-		cnt++
+		log.Part1(cnt)
+	} else {
+		log.Part1("Missing node AAA, skipping part 1")
 	}
-	log.Part1(cnt)
+
+	// Part 2
+	starts := []string{}
+	for n := range nodes {
+		if strings.HasSuffix(n, "A") {
+			starts = append(starts, n)
+		}
+	}
+	total := 1
+	for _, start := range starts {
+		cur := start
+		cnt := 0
+		dirIdx := 0
+		for !strings.HasSuffix(cur, "Z") {
+			dir := dirs[dirIdx]
+			dirIdx++
+			if dirIdx == len(dirs) {
+				dirIdx = 0
+			}
+
+			node, ok := nodes[cur]
+			evil.Assert(ok, "missing node ", cur)
+
+			switch dir {
+			case Left:
+				cur = node.left
+			case Right:
+				cur = node.right
+			default:
+				evil.Panic("invalid dir %d", dir)
+			}
+			cnt++
+		}
+
+		total = ints.LCM(total, cnt)
+	}
+	log.Part2(total)
 }
