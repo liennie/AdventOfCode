@@ -35,6 +35,13 @@ func last[T any, S []T](s S) T {
 	return s[len(s)-1]
 }
 
+func prepend[T any, S []T](s S, ts ...T) S {
+	res := make(S, len(s)+len(ts))
+	copy(res[:len(ts)], ts)
+	copy(res[len(ts):], s)
+	return res
+}
+
 func next(values []int) int {
 	vv := [][]int{values}
 	for !allZeros(last(vv)) && len(last(vv)) > 1 {
@@ -46,6 +53,19 @@ func next(values []int) int {
 	}
 
 	return last(vv[0])
+}
+
+func prev(values []int) int {
+	vv := [][]int{values}
+	for !allZeros(last(vv)) && len(last(vv)) > 1 {
+		vv = append(vv, differences(last(vv)))
+	}
+
+	for i := len(vv) - 1; i > 0; i-- {
+		vv[i-1] = prepend(vv[i-1], vv[i-1][0]-vv[i][0])
+	}
+
+	return vv[0][0]
 }
 
 func main() {
@@ -60,4 +80,11 @@ func main() {
 		sum += next(v)
 	}
 	log.Part1(sum)
+
+	// Part 2
+	sum = 0
+	for _, v := range values {
+		sum += prev(v)
+	}
+	log.Part2(sum)
 }
