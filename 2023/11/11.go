@@ -28,7 +28,7 @@ func parse(filename string) (set.Set[space.Point], space.AABB) {
 	return res, aabb
 }
 
-func expand(galaxies set.Set[space.Point], aabb space.AABB) (set.Set[space.Point], space.AABB) {
+func expand(galaxies set.Set[space.Point], aabb space.AABB, by int) (set.Set[space.Point], space.AABB) {
 	xoff := make([]int, aabb.Max.X+1)
 x:
 	for x := 0; x <= aabb.Max.X; x++ {
@@ -39,7 +39,7 @@ x:
 		}
 
 		for xo := x; xo < len(xoff); xo++ {
-			xoff[xo]++
+			xoff[xo] += by - 1
 		}
 	}
 
@@ -53,7 +53,7 @@ y:
 		}
 
 		for yo := y; yo < len(yoff); yo++ {
-			yoff[yo]++
+			yoff[yo] += by - 1
 		}
 	}
 
@@ -73,12 +73,22 @@ func main() {
 	galaxies, aabb := parse(filename)
 
 	// Part 1
-	galaxies, aabb = expand(galaxies, aabb)
+	expanded, _ := expand(galaxies, aabb, 2)
 	sum := 0
-	for a := range galaxies {
-		for b := range galaxies {
+	for a := range expanded {
+		for b := range expanded {
 			sum += a.Sub(b).ManhattanLen()
 		}
 	}
 	log.Part1(sum / 2)
+
+	// Part 2
+	expanded, _ = expand(galaxies, aabb, 1000000)
+	sum = 0
+	for a := range expanded {
+		for b := range expanded {
+			sum += a.Sub(b).ManhattanLen()
+		}
+	}
+	log.Part2(sum / 2)
 }
