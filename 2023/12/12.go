@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
@@ -12,6 +13,20 @@ import (
 type Springs struct {
 	raw    []byte
 	groups []int
+}
+
+func (s Springs) unfold(n int) Springs {
+	r := [][]byte{}
+	g := []int{}
+	for i := 0; i < n; i++ {
+		r = append(r, s.raw)
+		g = append(g, s.groups...)
+	}
+
+	return Springs{
+		raw:    bytes.Join(r, []byte{'?'}),
+		groups: g,
+	}
 }
 
 func parse(filename string) []Springs {
@@ -32,17 +47,25 @@ func parse(filename string) []Springs {
 	return res
 }
 
-func generate(groups []int, l int) [][]byte {
-	if l < 0 {
-		return [][]byte{{}}
-	}
-	if len(groups) == 0 {
-		return [][]byte{
-			bytes.Repeat([]byte{'.'}, l),
-		}
-	}
+var cache = map[string]int{}
 
-	res := [][]byte{}
+func combinations(raw []byte, groups []int, l int) (res int) {
+	cacheKey := fmt.Sprintf("%v %v %v", raw, groups, l)
+	if r, ok := cache[cacheKey]; ok {
+		return r
+	}
+	defer func() {
+		cache[cacheKey] = res
+	}()
+
+	if len(groups) == 0 {
+		for _, c := range raw {
+			if c == '#' {
+				return 0
+			}
+		}
+		return 1
+	}
 
 	to := l - groups[0]
 	for _, g := range groups[1:] {
@@ -50,17 +73,21 @@ func generate(groups []int, l int) [][]byte {
 		to--
 	}
 	evil.Assert(to >= 0, "groups are too large")
+
+	res = 0
+
 	for i := 0; i <= to; i++ {
-		nl := l - (i + groups[0] + 1)
-		for _, g := range generate(groups[1:], nl) {
-			gr := bytes.Repeat([]byte{'.'}, i)
-			gr = append(gr, bytes.Repeat([]byte{'#'}, groups[0])...)
-			if nl >= 0 {
-				gr = append(gr, '.')
-			}
-			gr = append(gr, g...)
-			res = append(res, gr)
+		start := bytes.Repeat([]byte{'.'}, i)
+		start = append(start, bytes.Repeat([]byte{'#'}, groups[0])...)
+		if l > len(start) {
+			start = append(start, '.')
 		}
+
+		if !overlaps(start, raw[:len(start)]) {
+			continue
+		}
+
+		res += combinations(raw[len(start):], groups[1:], l-len(start))
 	}
 
 	return res
@@ -86,11 +113,18 @@ func main() {
 	// Part 1
 	sum := 0
 	for _, spr := range springs {
-		for _, gr := range generate(spr.groups, len(spr.raw)) {
-			if overlaps(gr, spr.raw) {
-				sum++
-			}
-		}
+		sum += combinations(spr.raw, spr.groups, len(spr.raw))
 	}
 	log.Part1(sum)
+
+	// Part 2
+	unfolded := make([]Springs, len(springs))
+	for i := range springs {
+		unfolded[i] = springs[i].unfold(5)
+	}
+	sum = 0
+	for _, spr := range unfolded {
+		sum += combinations(spr.raw, spr.groups, len(spr.raw))
+	}
+	log.Part2(sum)
 }
