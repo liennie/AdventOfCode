@@ -21,18 +21,10 @@ func parse(filename string) [][]byte {
 	return res
 }
 
-func main() {
-	defer evil.Recover(log.Err)
-	filename := load.Filename()
-
-	grid := parse(filename)
+func energize(grid [][]byte, start Beam) int {
 	aabb := space.NewAABB(space.Point{}, space.Point{X: len(grid[0]) - 1, Y: len(grid) - 1})
 
-	// Part 1
-	beams := set.New(Beam{
-		pos: space.Point{X: 0, Y: 0},
-		dir: space.Point{X: 1},
-	})
+	beams := set.New(start)
 	energized := map[space.Point]set.Set[space.Point]{}
 	for len(beams) > 0 {
 		beam, _ := beams.Pop()
@@ -107,5 +99,50 @@ func main() {
 			}
 		}
 	}
-	log.Part1(len(energized))
+	return len(energized)
+}
+
+func main() {
+	defer evil.Recover(log.Err)
+	filename := load.Filename()
+
+	grid := parse(filename)
+
+	// Part 1
+	log.Part1(energize(grid, Beam{
+		pos: space.Point{X: 0, Y: 0},
+		dir: space.Point{X: 1},
+	}))
+
+	// Part 2
+	max := 0
+	for y := range grid {
+		if e := energize(grid, Beam{
+			pos: space.Point{X: 0, Y: y},
+			dir: space.Point{X: 1},
+		}); e > max {
+			max = e
+		}
+		if e := energize(grid, Beam{
+			pos: space.Point{X: len(grid[y]) - 1, Y: y},
+			dir: space.Point{X: -1},
+		}); e > max {
+			max = e
+		}
+	}
+	for x := range grid[0] {
+		if e := energize(grid, Beam{
+			pos: space.Point{X: x, Y: 0},
+			dir: space.Point{Y: 1},
+		}); e > max {
+			max = e
+		}
+		if e := energize(grid, Beam{
+			pos: space.Point{X: x, Y: len(grid) - 1},
+			dir: space.Point{Y: -1},
+		}); e > max {
+			max = e
+		}
+	}
+	log.Part2(max)
 }
