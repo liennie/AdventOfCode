@@ -10,6 +10,9 @@ type Point struct {
 
 func (p Point) Normalize() Point {
 	gcd := ints.GCD(ints.Abs(p.X), ints.Abs(p.Y))
+	if gcd == 0 {
+		return p
+	}
 	return Point{
 		X: p.X / gcd,
 		Y: p.Y / gcd,
