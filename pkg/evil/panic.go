@@ -16,6 +16,12 @@ func Assert(ok bool, a ...any) {
 	}
 }
 
+func Err(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func Recover(f func(err error)) {
 	if e := recover(); e != nil {
 		switch e := e.(type) {

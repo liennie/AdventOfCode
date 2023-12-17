@@ -36,35 +36,40 @@ func (g Graph) Edges(n Node) []path.Edge[Node] {
 			continue
 		}
 
-		cost := 0
-		for i := 1; i <= g.max; i++ {
-			tdir := dir.Scale(i)
-			npos := n.pos.Add(tdir)
+		if n.from.Normalize() == dir {
+			npos := n.pos.Add(dir)
 			if !g.aabb.Contains(npos) {
-				break
-			}
-
-			tfrom := n.from.Add(tdir)
-			if ints.Abs(tfrom.X) > g.max || ints.Abs(tfrom.Y) > g.max {
-				break
-			}
-
-			cost += g.blocks[npos.Y][npos.X]
-			if i < g.min {
 				continue
 			}
 
-			var from space.Point
-			if n.from.Normalize() == dir {
-				from = tfrom
-			} else {
-				from = tdir
+			from := n.from.Add(dir)
+			if ints.Abs(from.X) > g.max || ints.Abs(from.Y) > g.max {
+				continue
+			}
+
+			edges = append(edges, path.Edge[Node]{
+				Len: g.blocks[npos.Y][npos.X],
+				To: Node{
+					from: from,
+					pos:  npos,
+				},
+			})
+		} else {
+			npos := n.pos.Add(dir.Scale(g.min))
+			if !g.aabb.Contains(npos) {
+				continue
+			}
+
+			cost := 0
+			for i := 1; i <= g.min; i++ {
+				p := n.pos.Add(dir.Scale(i))
+				cost += g.blocks[p.Y][p.X]
 			}
 
 			edges = append(edges, path.Edge[Node]{
 				Len: cost,
 				To: Node{
-					from: from,
+					from: dir.Scale(g.min),
 					pos:  npos,
 				},
 			})
@@ -96,7 +101,7 @@ func main() {
 		Node{pos: space.Point{X: 0, Y: 0}},
 		path.EndFunc[Node](func(n Node) bool { return n.pos == end }),
 	)
-	evil.Assert(err == nil, err)
+	evil.Err(err)
 	log.Part1(l)
 
 	// Part 2
@@ -110,6 +115,6 @@ func main() {
 		Node{pos: space.Point{X: 0, Y: 0}},
 		path.EndFunc[Node](func(n Node) bool { return n.pos == end }),
 	)
-	evil.Assert(err == nil, err)
+	evil.Err(err)
 	log.Part2(l)
 }
