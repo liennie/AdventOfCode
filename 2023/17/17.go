@@ -25,6 +25,7 @@ type Node struct {
 type Graph struct {
 	blocks   [][]int
 	aabb     space.AABB
+	end      space.Point
 	min, max int
 }
 
@@ -79,6 +80,12 @@ func (g Graph) Edges(n Node) []path.Edge[Node] {
 	return edges
 }
 
+func (g Graph) Heuristic(n Node) int {
+	return n.pos.Sub(g.end).ManhattanLen()
+}
+
+var _ path.AStarGraph[Node] = Graph{}
+
 func main() {
 	defer evil.Recover(log.Err)
 	filename := load.Filename()
@@ -95,6 +102,7 @@ func main() {
 		Graph{
 			blocks: blocks,
 			aabb:   aabb,
+			end:    end,
 			min:    1,
 			max:    3,
 		},
@@ -109,6 +117,7 @@ func main() {
 		Graph{
 			blocks: blocks,
 			aabb:   aabb,
+			end:    end,
 			min:    4,
 			max:    10,
 		},

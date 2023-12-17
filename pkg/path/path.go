@@ -22,6 +22,11 @@ func (g GraphFunc[N]) Edges(n N) []Edge[N] {
 
 var _ Graph[int] = GraphFunc[int](nil)
 
+type AStarGraph[N comparable] interface {
+	Graph[N]
+	Heuristic(N) int
+}
+
 type End[N comparable] interface {
 	IsEnd(N) bool
 }
@@ -40,12 +45,13 @@ func EndConst[N comparable](e N) End[N] {
 
 var ErrNotFound = errors.New("path not found")
 
-func Shortest[N comparable](g Graph[N], start N, end End[N]) ([]N, int, error) {
+func shortest[N comparable](g AStarGraph[N], start N, end End[N]) ([]N, int, error) {
 	h := &pathHeap[N]{}
-	shortest := map[N]int{
-		start: 0,
+	sp := &path[N]{node: start}
+	shortest := map[N]*path[N]{
+		start: sp,
 	}
-	heap.Push(h, &path[N]{node: start})
+	heap.Push(h, sp)
 
 	for h.Len() > 0 {
 		p := heap.Pop(h).(*path[N])
@@ -65,22 +71,42 @@ func Shortest[N comparable](g Graph[N], start N, end End[N]) ([]N, int, error) {
 
 		for _, edge := range g.Edges(p.node) {
 			l := p.len + edge.Len
+			k := g.Heuristic(edge.To)
 
 			if s, ok := shortest[edge.To]; ok {
-				if l >= s {
+				if l+k >= s.len+s.h {
 					continue
 				}
-			}
 
-			// TODO delete prev path from heap
-			shortest[edge.To] = l
-			heap.Push(h, &path[N]{
-				len:  l,
-				node: edge.To,
-				prev: p,
-			})
+				s.len = l
+				s.h = k
+				s.prev = p
+				heap.Fix(h, s.idx)
+			} else {
+				np := &path[N]{
+					len:  l,
+					h:    k,
+					node: edge.To,
+					prev: p,
+				}
+				shortest[edge.To] = np
+				heap.Push(h, np)
+			}
 		}
 	}
 
 	return nil, 0, ErrNotFound
+}
+
+type dijkstraGraph[N comparable] struct {
+	Graph[N]
+}
+
+func (dijkstraGraph[N]) Heuristic(N) int { return 0 }
+
+func Shortest[N comparable](g Graph[N], start N, end End[N]) ([]N, int, error) {
+	if ag, ok := g.(AStarGraph[N]); ok {
+		return shortest(ag, start, end)
+	}
+	return shortest(dijkstraGraph[N]{g}, start, end)
 }
