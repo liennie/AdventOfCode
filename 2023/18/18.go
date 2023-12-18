@@ -2,30 +2,25 @@ package main
 
 import (
 	"fmt"
-	"image/color"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
-	"github.com/liennie/AdventOfCode/pkg/set"
 	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
 type Plan struct {
-	dir   space.Point
-	l     int
-	color color.RGBA
+	dir space.Point
+	l   int
 }
 
-func parse(filename string) []Plan {
+func parse1(filename string) []Plan {
 	res := []Plan{}
 	for line := range load.File(filename) {
 		var d string
 		var n int
-		c := color.RGBA{
-			A: 255,
-		}
-		_, err := fmt.Sscanf(line, "%s %d (#%02x%02x%02x)", &d, &n, &c.R, &c.G, &c.B)
+
+		_, err := fmt.Sscanf(line, "%s %d", &d, &n)
 		evil.Err(err)
 
 		p := Plan{}
@@ -44,50 +39,68 @@ func parse(filename string) []Plan {
 		}
 
 		p.l = n
-		p.color = c
 
 		res = append(res, p)
 	}
 	return res
 }
 
+func parse2(filename string) []Plan {
+	res := []Plan{}
+	for line := range load.File(filename) {
+		var d string
+		var n int
+		var hn int
+		var hd int
+
+		_, err := fmt.Sscanf(line, "%s %d (#%05x%d)", &d, &n, &hn, &hd)
+		evil.Err(err)
+
+		p := Plan{}
+
+		switch hd {
+		case 3:
+			p.dir = space.Point{Y: -1}
+		case 1:
+			p.dir = space.Point{Y: 1}
+		case 2:
+			p.dir = space.Point{X: -1}
+		case 0:
+			p.dir = space.Point{X: 1}
+		default:
+			evil.Panic("invalid dir %d", hd)
+		}
+
+		p.l = hn
+
+		res = append(res, p)
+	}
+	return res
+}
+
+func dig(plans []Plan) int {
+	total := 0
+	tl := 0
+	x := 0
+	pos := space.Point{}
+	for _, plan := range plans {
+		l := plan.dir.Scale(plan.l)
+		pos = pos.Add(l)
+		x += l.X
+		total += x * l.Y
+		tl += plan.l
+	}
+	evil.Assert(pos == space.Point{})
+
+	total += tl/2 + 1
+
+	return total
+}
+
 func main() {
 	defer evil.Recover(log.Err)
 	filename := load.Filename()
 
-	plans := parse(filename)
-
-	// Part 1
-	dug := set.Set[space.Point]{}
-	dir := map[space.Point]space.Point{}
-	aabb := space.AABB{}
-	pos := space.Point{}
-	for _, plan := range plans {
-		aabb = aabb.Add(pos)
-		for i := 0; i < plan.l; i++ {
-			dug.Add(pos)
-			if plan.dir.Y != 0 {
-				dir[pos] = plan.dir
-			}
-			pos = pos.Add(plan.dir)
-		}
-		if plan.dir.Y != 0 {
-			dir[pos] = plan.dir
-		}
-	}
-	evil.Assert(pos == space.Point{})
-	for y := aabb.Min.Y; y <= aabb.Max.Y; y++ {
-		prev := space.Point{}
-		dig := false
-		for x := aabb.Min.X; x <= aabb.Max.X; x++ {
-			if d := dir[space.Point{X: x, Y: y}]; d != (space.Point{}) && d != prev {
-				dig = !dig
-				prev = d
-			}
-			if dig {
-				dug.Add(space.Point{X: x, Y: y})
-			}
-		}
-	}
-	log.Part1(len(dug))
+	log.Part1(dig(parse1(filename)))
+	log.Part2(dig(parse2(filename)))
 }
