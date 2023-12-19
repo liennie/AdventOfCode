@@ -7,9 +7,28 @@ import (
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
+	"github.com/liennie/AdventOfCode/pkg/set"
 )
 
+const MinPart = 1
+const MaxPart = 4000
+
 type Part map[string]int
+
+type MultiPart map[string]set.Range
+
+func (p MultiPart) amount() int {
+	total := 1
+	for _, r := range p {
+		l := r.Len()
+		if l < 0 {
+			return 0
+		}
+
+		total *= l
+	}
+	return total
+}
 
 type Rule struct {
 	cat    string
@@ -35,6 +54,35 @@ func (r Rule) eval(p Part) (string, bool) {
 	return "", false
 }
 
+func (r Rule) multiEval(p MultiPart) (string, MultiPart, MultiPart, bool) {
+	if r.cat == "" {
+		return r.next, p, nil, true
+	}
+
+	nextp := MultiPart{}
+	restp := MultiPart{}
+	for k, v := range p {
+		nextp[k] = v
+		restp[k] = v
+	}
+
+	switch r.op {
+	case '<':
+		nextp[r.cat] = nextp[r.cat].Intersection(set.Range{Min: MinPart, Max: r.thresh - 1})
+		restp[r.cat] = restp[r.cat].Intersection(set.Range{Min: r.thresh, Max: MaxPart})
+		if nextp[r.cat].Len() > 0 {
+			return r.next, nextp, restp, true
+		}
+	case '>':
+		nextp[r.cat] = nextp[r.cat].Intersection(set.Range{Min: r.thresh + 1, Max: MaxPart})
+		restp[r.cat] = restp[r.cat].Intersection(set.Range{Min: MinPart, Max: r.thresh})
+		if nextp[r.cat].Len() > 0 {
+			return r.next, nextp, restp, true
+		}
+	}
+	return "", nil, p, false
+}
+
 type Workflow struct {
 	rules []Rule
 }
@@ -47,6 +95,26 @@ func (w Workflow) eval(p Part) string {
 	}
 	evil.Panic("no rule matched, w: %v, p: %v", w, p)
 	return ""
+}
+
+type MultiNext struct {
+	next string
+	part MultiPart
+}
+
+func (w Workflow) multiEval(p MultiPart) []MultiNext {
+	res := []MultiNext{}
+	for _, rule := range w.rules {
+		next, nextp, restp, ok := rule.multiEval(p)
+		if ok {
+			res = append(res, MultiNext{
+				next: next,
+				part: nextp,
+			})
+			p = restp
+		}
+	}
+	return res
 }
 
 func parseRule(rule string) Rule {
@@ -120,4 +188,42 @@ func main() {
 		}
 	}
 	log.Part1(sum)
+
+	// Part 2
+	accepted := []MultiPart{}
+	done := set.String{}
+	nexts := []MultiNext{{
+		next: "in",
+		part: MultiPart{
+			"x": set.Range{Min: MinPart, Max: MaxPart},
+			"m": set.Range{Min: MinPart, Max: MaxPart},
+			"a": set.Range{Min: MinPart, Max: MaxPart},
+			"s": set.Range{Min: MinPart, Max: MaxPart},
+		},
+	}}
+	for len(nexts) > 0 {
+		next := nexts[0]
+		nexts = nexts[1:]
+
+		if next.next == "R" {
+			continue
+		}
+		if next.next == "A" {
+			accepted = append(accepted, next.part)
+			continue
+		}
+
+		evil.Assert(!done.Contains(next.next), "loop detected")
+
+		w, ok := workflows[next.next]
+		evil.Assert(ok)
+
+		nexts = append(nexts, w.multiEval(next.part)...)
+		done.Add(next.next)
+	}
+	sum = 0
+	for _, p := range accepted {
+		sum += p.amount()
+	}
+	log.Part2(sum)
 }
