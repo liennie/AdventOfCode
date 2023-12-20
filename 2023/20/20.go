@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 )
@@ -184,4 +185,13 @@ func main() {
 		}
 	}
 	log.Part1(total[false] * total[true])
+
+	// Part 2
+	lcm := 1
+	// "input.lcm" was created manually by converting the input into dot
+	// and analyzing the rendered graph
+	for line := range load.File("input.lcm") {
+		lcm = ints.LCM(lcm, evil.Atoi(line))
+	}
+	log.Part2(lcm)
 }
