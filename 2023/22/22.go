@@ -22,7 +22,7 @@ func parsePoint(raw string) space.Point3 {
 	}
 }
 
-func parse(filename string) Tower {
+func parse(filename string) *Tower {
 	bricks := []*Brick{}
 	for line := range load.File(filename) {
 		min, max, ok := strings.Cut(line, "~")
@@ -35,6 +35,12 @@ func parse(filename string) Tower {
 
 type Brick struct {
 	aabb space.AABB3
+}
+
+func (b *Brick) clone() *Brick {
+	return &Brick{
+		aabb: b.aabb,
+	}
 }
 
 func (b *Brick) forEach(f func(space.Point3) bool) bool {
@@ -59,7 +65,7 @@ type Tower struct {
 	tower  map[space.Point3]*Brick
 }
 
-func NewTower(bricks []*Brick) Tower {
+func NewTower(bricks []*Brick) *Tower {
 	t := map[space.Point3]*Brick{}
 	for _, brick := range bricks {
 		brick.forEach(func(p space.Point3) bool {
@@ -68,10 +74,29 @@ func NewTower(bricks []*Brick) Tower {
 		})
 	}
 
-	return Tower{
+	return &Tower{
 		bricks: bricks,
 		tower:  t,
 	}
+}
+
+func (t *Tower) clone() *Tower {
+	newBricks := make([]*Brick, len(t.bricks))
+	for i := range t.bricks {
+		newBricks[i] = t.bricks[i].clone()
+	}
+	return NewTower(newBricks)
+}
+
+func (t *Tower) remove(brick *Brick) {
+	brick.forEach(func(p space.Point3) bool {
+		evil.Assert(t.tower[p] == brick, "this brick is not in this tower")
+		delete(t.tower, p)
+		return true
+	})
+	slices.DeleteFunc(t.bricks, func(b *Brick) bool {
+		return b == brick
+	})
 }
 
 func (t *Tower) move(brick *Brick, dir space.Point3) bool {
@@ -89,6 +114,7 @@ func (t *Tower) move(brick *Brick, dir space.Point3) bool {
 	}
 
 	brick.forEach(func(p space.Point3) bool {
+		evil.Assert(t.tower[p] == brick, "this brick is not in this tower")
 		delete(t.tower, p)
 		return true
 	})
@@ -103,9 +129,11 @@ func (t *Tower) move(brick *Brick, dir space.Point3) bool {
 	return true
 }
 
-func (t *Tower) fall() {
+func (t *Tower) fall() int {
 	falling := slices.Clone(t.bricks)
 	slices.SortFunc(falling, func(a, b *Brick) int { return cmp.Compare(a.aabb.Min.Z, b.aabb.Min.Z) })
+
+	fallen := set.Set[*Brick]{}
 
 	gravity := space.Point3{Z: -1}
 	for len(falling) > 0 {
@@ -114,8 +142,11 @@ func (t *Tower) fall() {
 
 		if t.move(brick, gravity) {
 			falling = append(falling, brick)
+			fallen.Add(brick)
 		}
 	}
+
+	return len(fallen)
 }
 
 func main() {
@@ -157,4 +188,13 @@ bricks:
 		cnt++
 	}
 	log.Part1(cnt)
+
+	// Part 2
+	total := 0
+	for i := range tower.bricks {
+		new := tower.clone()
+		new.remove(new.bricks[i])
+		total += new.fall()
+	}
+	log.Part2(total)
 }
