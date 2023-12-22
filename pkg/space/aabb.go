@@ -41,6 +41,11 @@ func (aabb AABB) Contains(p Point) bool {
 		p.Y >= aabb.Min.Y && p.Y <= aabb.Max.Y
 }
 
+func (aabb AABB) Overlaps(other AABB) bool {
+	return (aabb.Max.X >= other.Min.X && aabb.Min.X <= other.Max.X) &&
+		(aabb.Max.Y >= other.Min.Y && aabb.Min.Y <= other.Max.Y)
+}
+
 func (aabb AABB) Expand(n int) AABB {
 	if !aabb.Valid {
 		return aabb
