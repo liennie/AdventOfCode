@@ -133,9 +133,9 @@ func newGraph(forest [][]byte) *Graph {
 	}
 }
 
-func _longest(start, end *Crossroads, visited set.Set[*Crossroads], slippery bool, l int) (int, bool) {
+func _longest(start, end *Crossroads, visited set.Set[*Crossroads], slippery bool) (int, bool) {
 	if start == end {
-		return l, true
+		return 0, true
 	}
 
 	visited.Add(start)
@@ -154,9 +154,9 @@ func _longest(start, end *Crossroads, visited set.Set[*Crossroads], slippery boo
 			continue
 		}
 
-		tl, ok := _longest(c, end, visited, slippery, l)
+		tl, ok := _longest(c, end, visited, slippery)
 		if ok {
-			ml = max(ml, l+cl+tl)
+			ml = max(ml, cl+tl)
 		}
 	}
 
@@ -164,7 +164,7 @@ func _longest(start, end *Crossroads, visited set.Set[*Crossroads], slippery boo
 }
 
 func longest(start, end *Crossroads, slippery bool) int {
-	l, ok := _longest(start, end, set.New[*Crossroads](), slippery, 0)
+	l, ok := _longest(start, end, set.New[*Crossroads](), slippery)
 	evil.Assert(ok)
 	return l
 }
