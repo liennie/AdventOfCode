@@ -4,7 +4,6 @@ import (
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
-	"github.com/liennie/AdventOfCode/pkg/path"
 	"github.com/liennie/AdventOfCode/pkg/set"
 	"github.com/liennie/AdventOfCode/pkg/space"
 )
@@ -17,17 +16,21 @@ func parse(filename string) [][]byte {
 	return res
 }
 
-type Graph struct {
-	forest [][]byte
-	start  space.Point
-	end    space.Point
-	max    int
+type Crossroads struct {
+	next map[*Crossroads]int
+	all  map[*Crossroads]int
 }
 
-type Node struct {
-	pos      space.Point
-	previous *Node
-	len      int
+func newCrossroads() *Crossroads {
+	return &Crossroads{
+		next: map[*Crossroads]int{},
+		all:  map[*Crossroads]int{},
+	}
+}
+
+type Graph struct {
+	start *Crossroads
+	end   *Crossroads
 }
 
 func newGraph(forest [][]byte) *Graph {
@@ -50,67 +53,120 @@ func newGraph(forest [][]byte) *Graph {
 	}
 	evil.Assert(end.X >= 0)
 
+	cross := map[space.Point]*Crossroads{}
+
+	slopes := map[byte]space.Point{
+		'>': {X: 1},
+		'^': {Y: -1},
+		'<': {X: -1},
+		'v': {Y: 1},
+	}
+
+	var walkFrom func(space.Point) *Crossroads
+	walkFrom = func(p space.Point) *Crossroads {
+		if c, ok := cross[p]; ok {
+			return c
+		}
+		c := newCrossroads()
+		cross[p] = c
+
+		for _, dir := range []space.Point{{X: 1}, {Y: -1}, {X: -1}, {Y: 1}} {
+			next := p.Add(dir)
+			if next.Y < 0 || next.Y >= len(forest) || next.X < 0 || next.X >= len(forest[next.Y]) || forest[next.Y][next.X] == '#' {
+				continue
+			}
+
+			l := 0
+			prev := p
+			cur := p
+			slope := false
+			crs := false
+
+			for !crs {
+				l++
+				prev, cur = cur, next
+
+				if cur == start || cur == end {
+					crs = true
+					break
+				}
+
+				for _, dir := range []space.Point{{X: 1}, {Y: -1}, {X: -1}, {Y: 1}} {
+					n := cur.Add(dir)
+					if n == prev {
+						continue
+					}
+
+					if n.Y < 0 || n.Y >= len(forest) || n.X < 0 || n.X >= len(forest[n.Y]) || forest[n.Y][n.X] == '#' {
+						continue
+					}
+
+					if next != cur {
+						crs = true
+						break
+					}
+
+					next = n
+					if slopes[forest[cur.Y][cur.X]] == dir.Flip() {
+						slope = true
+					}
+				}
+			}
+
+			nc := walkFrom(cur)
+			if !slope {
+				c.next[nc] = l
+			}
+			c.all[nc] = l
+		}
+
+		return c
+	}
+
+	walkFrom(start)
+
+	log.Printf("mapped %d nodes", len(cross))
+
 	return &Graph{
-		forest: forest,
-		start:  start,
-		end:    end,
+		start: cross[start],
+		end:   cross[end],
 	}
 }
 
-func (g *Graph) Start() *Node {
-	return &Node{
-		pos: g.start,
-	}
-}
-
-func (g *Graph) Edges(n *Node) []path.Edge[*Node] {
-	var dirs []space.Point
-	switch g.forest[n.pos.Y][n.pos.X] {
-	case '>':
-		dirs = []space.Point{{X: 1}}
-	case '^':
-		dirs = []space.Point{{Y: -1}}
-	case '<':
-		dirs = []space.Point{{X: -1}}
-	case 'v':
-		dirs = []space.Point{{Y: 1}}
-	case '.':
-		dirs = []space.Point{{X: 1}, {Y: -1}, {X: -1}, {Y: 1}}
+func _longest(start, end *Crossroads, visited set.Set[*Crossroads], slippery bool, l int) (int, bool) {
+	if start == end {
+		return l, true
 	}
 
-	next := set.New[space.Point]()
-	for _, dir := range dirs {
-		e := n.pos.Add(dir)
-		x, y := e.X, e.Y
-		if x >= 0 && x < len(g.forest[0]) && y >= 0 && y < len(g.forest) && g.forest[y][x] != '#' {
-			next.Add(e)
+	visited.Add(start)
+	defer visited.Remove(start)
+
+	var next map[*Crossroads]int
+	if slippery {
+		next = start.next
+	} else {
+		next = start.all
+	}
+
+	ml := 0
+	for c, cl := range next {
+		if visited.Contains(c) {
+			continue
+		}
+
+		tl, ok := _longest(c, end, visited, slippery, l)
+		if ok {
+			ml = max(ml, l+cl+tl)
 		}
 	}
 
-	for p := n.previous; p != nil; p = p.previous {
-		next.Remove(p.pos)
-	}
-
-	res := []path.Edge[*Node]{}
-	for p := range next {
-		res = append(res, path.Edge[*Node]{
-			Len: 1,
-			To: &Node{
-				pos:      p,
-				previous: n,
-				len:      n.len + 1,
-			},
-		})
-	}
-	return res
+	return ml, ml > 0
 }
 
-func (g *Graph) IsEnd(n *Node) bool {
-	if n.pos == g.end {
-		g.max = max(g.max, n.len)
-	}
-
-	return false
+func longest(start, end *Crossroads, slippery bool) int {
+	l, ok := _longest(start, end, set.New[*Crossroads](), slippery, 0)
+	evil.Assert(ok)
+	return l
 }
 
 func main() {
@@ -121,7 +177,8 @@ func main() {
 
 	// Part 1
 	graph := newGraph(forest)
-	_, _, err := path.Shortest(graph, graph.Start(), graph)
-	evil.Assert(err == path.ErrNotFound)
-	log.Part1(graph.max)
+	log.Part1(longest(graph.start, graph.end, true))
+
+	// Part 2
+	log.Part2(longest(graph.start, graph.end, false))
 }
