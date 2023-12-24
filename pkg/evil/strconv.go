@@ -6,7 +6,7 @@ import (
 )
 
 func Atoi(s string) int {
-	i, err := strconv.Atoi(s)
+	i, err := strconv.Atoi(strings.TrimSpace(s))
 	if err != nil {
 		Panic("Atoi(%s): %w", s, err)
 	}
