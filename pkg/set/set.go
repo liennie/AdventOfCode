@@ -2,7 +2,10 @@ package set
 
 import (
 	"cmp"
+	"fmt"
 	"slices"
+
+	"golang.org/x/exp/maps"
 )
 
 type Set[T comparable] map[T]struct{}
@@ -60,6 +63,10 @@ func (s Set[T]) Pop() (T, bool) {
 	}
 	var zero T
 	return zero, false
+}
+
+func (s Set[T]) String() string {
+	return fmt.Sprint(maps.Keys(s))
 }
 
 func Intersection[T comparable](sets ...Set[T]) Set[T] {

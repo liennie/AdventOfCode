@@ -10,6 +10,7 @@ func Panic(format string, a ...interface{}) {
 	panic(fmt.Errorf(format, a...))
 }
 
+// TODO ...any -> format, ...any
 func Assert(ok bool, a ...any) {
 	if !ok {
 		panic(errors.New(fmt.Sprint(a...)))
