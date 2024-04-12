@@ -33,6 +33,22 @@ func (p Point3) Add(other Point3) Point3 {
 	}
 }
 
+func (p Point3) Mul(other Point3) Point3 {
+	return Point3{
+		X: p.X * other.X,
+		Y: p.Y * other.Y,
+		Z: p.Z * other.Z,
+	}
+}
+
+func (p Point3) Scale(sc int) Point3 {
+	return Point3{
+		X: p.X * sc,
+		Y: p.Y * sc,
+		Z: p.Z * sc,
+	}
+}
+
 func (p Point3) Equals(other Point3) bool {
 	return p.X == other.X && p.Y == other.Y && p.Z == other.Z
 }

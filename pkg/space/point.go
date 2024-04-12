@@ -33,6 +33,13 @@ func (p Point) Add(other Point) Point {
 	}
 }
 
+func (p Point) Mul(other Point) Point {
+	return Point{
+		X: p.X * other.X,
+		Y: p.Y * other.Y,
+	}
+}
+
 func (p Point) Scale(sc int) Point {
 	return Point{
 		X: p.X * sc,
