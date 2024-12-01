@@ -21,6 +21,14 @@ func parse(filename string) (left, right []int) {
 	return
 }
 
+func counts(ints ...int) map[int]int {
+	c := map[int]int{}
+	for _, i := range ints {
+		c[i]++
+	}
+	return c
+}
+
 func main() {
 	defer evil.Recover(log.Err)
 	filename := load.Filename()
@@ -38,4 +46,15 @@ func main() {
 	}
 
 	log.Part1(dist)
+
+	// Part 2
+	leftCounts := counts(left...)
+	rightCount := counts(right...)
+
+	similarity := 0
+	for n, c := range leftCounts {
+		similarity += n * c * rightCount[n]
+	}
+
+	log.Part2(similarity)
 }
