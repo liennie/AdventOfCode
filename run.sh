@@ -1,8 +1,17 @@
 #!/bin/bash
 # Runs current day
 
+set -e
+
 YEAR=$(TZ=EST date +%Y)
+MONTH=$(TZ=EST date +%m)
 DAY=$(TZ=EST date +%d)
+
+if [[ $MONTH != 12 || $DAY > 25 ]]; then
+	echo "🟡 Today is not an advent day"
+	exit 1
+fi
+
 DIR="$YEAR/$DAY"
 PREP=bin/prepare
 INPUT=input.txt
@@ -15,5 +24,5 @@ if [ ! -f "$DIR/$INPUT" ]; then
 	"$PREP"
 fi
 
-cd "$YEAR/$DAY"
+cd "$DIR"
 exec go run "$DAY.go" "$@"

@@ -193,6 +193,14 @@ func downloadInput(year, day int) error {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		msg, err := io.ReadAll(resp.Body)
+		if err != nil {
+			msg = []byte(err.Error())
+		}
+		return fmt.Errorf("http status %d: %s: %s", resp.StatusCode, resp.Status, string(msg))
+	}
+
 	logCreate(dstPath)
 	dst, err := os.Create(dstPath)
 	if err != nil {
@@ -211,30 +219,36 @@ func main() {
 	year, day, err := prepDay()
 	if err != nil {
 		log.Printf("🔴 Error parsing aruments: %v", err)
+		os.Exit(1)
 		return
 	}
 	if year < 2015 || year > 3000 {
 		log.Printf("🔴 Invalid year %d", year)
+		os.Exit(1)
 		return
 	}
 	if day == 0 {
 		log.Println("🔴 Please specify which day to preprare")
+		os.Exit(1)
 		return
 	}
 	if day > 25 {
 		log.Printf("🔴 Invalid day %d", day)
+		os.Exit(1)
 		return
 	}
 
 	err = mkDir(year, day)
 	if err != nil {
 		log.Printf("🔴 Error preparing directory: %v", err)
+		os.Exit(2)
 		return
 	}
 
 	err = downloadInput(year, day)
 	if err != nil {
 		log.Printf("🔴 Error downloading input: %v", err)
+		os.Exit(3)
 		return
 	}
 }
