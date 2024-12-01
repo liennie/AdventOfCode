@@ -1,19 +1,10 @@
-BINARIES := $(foreach bin,$(shell ls cmd),bin/$(bin))
-
-TEST_SOURCES := $(shell find . -type f -name '*.go' -print) go.mod go.sum
-TEST_DIRS := $(shell go list ./...)
+SOURCES := $(shell find cmd/prepare -type f -print)
 PWD := $(shell pwd)
 
-all: $(BINARIES)
-
-bin/%: cmd/%/*
-	@echo $@
-	@GOBIN=$(PWD)/bin go install -tags purego ./cmd/$(notdir $@)/...
-
-test: $(TEST_SOURCES)
-	@go test -cover -race $(LDFLAGS) $(TEST_DIRS)
+bin/prepare: $(SOURCES) go.mod go.sum
+	@GOBIN=$(PWD)/bin go install ./cmd/prepare/...
 
 clean:
 	@if [ -d ./bin ] ; then rm -r ./bin ; fi
 
-.PHONY: test clean
+.PHONY: clean
