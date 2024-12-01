@@ -4,31 +4,37 @@ import (
 	"bufio"
 	"container/list"
 	"io"
+	"iter"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/set"
 )
 
-func callback(filename string, f func(line string)) {
-	file, err := os.Open(filename)
-	if err != nil {
-		evil.Panic("os.Open: %w", err)
-	}
-	defer file.Close()
-
-	r := bufio.NewReader(file)
-	for {
-		l, err := r.ReadString('\n')
-		if len(l) > 0 {
-			f(strings.TrimSuffix(l, "\n"))
-		}
+func lines(filename string) iter.Seq[string] {
+	return func(yield func(string) bool) {
+		file, err := os.Open(filename)
 		if err != nil {
-			if err != io.EOF {
-				evil.Panic("ReadString: %w", err)
+			evil.Panic("os.Open: %w", err)
+		}
+		defer file.Close()
+
+		r := bufio.NewReader(file)
+		for {
+			l, err := r.ReadString('\n')
+			if len(l) > 0 {
+				if !yield(strings.TrimSuffix(l, "\n")) {
+					return
+				}
 			}
-			return
+			if err != nil {
+				if err != io.EOF {
+					evil.Panic("ReadString: %w", err)
+				}
+				return
+			}
 		}
 	}
 }
@@ -39,9 +45,9 @@ func File(filename string) <-chan string {
 	go func() {
 		defer close(ch)
 
-		callback(filename, func(line string) {
+		for line := range lines(filename) {
 			ch <- line
-		})
+		}
 	}()
 
 	return ch
@@ -62,7 +68,7 @@ func Blocks(filename string) <-chan (<-chan string) {
 			}
 		}()
 
-		callback(filename, func(line string) {
+		for line := range lines(filename) {
 			if line == "" {
 				if bch != nil {
 					close(bch)
@@ -78,38 +84,26 @@ func Blocks(filename string) <-chan (<-chan string) {
 				blank = false
 			}
 			bch <- line
-		})
+		}
 	}()
 
 	return ch
 }
 
 func Slice(filename string) []string {
-	res := []string{}
-
-	callback(filename, func(line string) {
-		res = append(res, line)
-	})
-
-	return res
+	return slices.Collect(lines(filename))
 }
 
 func Set(filename string) set.String {
-	res := set.String{}
-
-	callback(filename, func(line string) {
-		res.Add(line)
-	})
-
-	return res
+	return set.Collect(lines(filename))
 }
 
 func List(filename string) *list.List {
 	res := list.New()
 
-	callback(filename, func(line string) {
+	for line := range lines(filename) {
 		res.PushBack(line)
-	})
+	}
 
 	return res
 }

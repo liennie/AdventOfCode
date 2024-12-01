@@ -3,6 +3,7 @@ package set
 import (
 	"cmp"
 	"fmt"
+	"iter"
 	"slices"
 
 	"golang.org/x/exp/maps"
@@ -15,6 +16,14 @@ type String = Set[string]
 func New[T comparable](items ...T) Set[T] {
 	set := Set[T]{}
 	set.Add(items...)
+	return set
+}
+
+func Collect[T comparable](items iter.Seq[T]) Set[T] {
+	set := Set[T]{}
+	for item := range items {
+		set.Add(item)
+	}
 	return set
 }
 
