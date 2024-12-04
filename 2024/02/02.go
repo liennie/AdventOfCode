@@ -66,5 +66,5 @@ func main() {
 			}
 		}
 	}
-	log.Part1(safe)
+	log.Part2(safe)
 }
