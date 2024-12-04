@@ -54,4 +54,31 @@ func main() {
 		}
 	}
 	log.Part1(count)
+
+	// Part 2
+	patterns := []map[space.Point]string{
+		{{-1, 1}: "M", {-1, -1}: "M", {1, -1}: "S", {1, 1}: "S"},
+		{{-1, 1}: "S", {-1, -1}: "M", {1, -1}: "M", {1, 1}: "S"},
+		{{-1, 1}: "S", {-1, -1}: "S", {1, -1}: "M", {1, 1}: "M"},
+		{{-1, 1}: "M", {-1, -1}: "S", {1, -1}: "S", {1, 1}: "M"},
+	}
+
+	count = 0
+	for start := range grid {
+		if grid[start] != "A" {
+			continue
+		}
+
+	patterns:
+		for _, pattern := range patterns {
+			for offset, letter := range pattern {
+				if grid[start.Add(offset)] != letter {
+					continue patterns
+				}
+			}
+
+			count++
+		}
+	}
+	log.Part2(count)
 }
