@@ -23,4 +23,27 @@ func main() {
 		}
 	}
 	log.Part1(sum)
+
+	// Part 2
+	re = regexp.MustCompile(`(mul)\((\d{1,3}),(\d{1,3})\)|(do)\(\)|(don't)\(\)`)
+	sum = 0
+	enabled := true
+	for _, line := range memory {
+		for _, match := range re.FindAllStringSubmatch(line, -1) {
+			switch {
+			case match[1] == "mul":
+				if enabled {
+					sum += evil.Atoi(match[2]) * evil.Atoi(match[3])
+				}
+
+			case match[4] == "do":
+				enabled = true
+
+			case match[5] == "don't":
+				enabled = false
+			}
+
+		}
+	}
+	log.Part2(sum)
 }
