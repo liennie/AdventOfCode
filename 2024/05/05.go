@@ -1,6 +1,8 @@
 package main
 
 import (
+	"slices"
+
 	"github.com/liennie/AdventOfCode/pkg/channel"
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/load"
@@ -51,6 +53,28 @@ func main() {
 	sum := 0
 	for _, update := range updates {
 		if ordered(update, rules) {
+			sum += update[len(update)/2]
+		}
+	}
+	log.Part1(sum)
+
+	// Part 2
+	sum = 0
+	for _, update := range updates {
+		if !ordered(update, rules) {
+			slices.SortFunc(update, func(a, b int) int {
+				switch {
+				case rules.Contains(Rule{a, b}):
+					return -1
+
+				case rules.Contains(Rule{b, a}):
+					return 1
+
+				default:
+					return 0
+				}
+			})
+
 			sum += update[len(update)/2]
 		}
 	}
