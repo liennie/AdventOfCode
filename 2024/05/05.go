@@ -78,5 +78,5 @@ func main() {
 			sum += update[len(update)/2]
 		}
 	}
-	log.Part1(sum)
+	log.Part2(sum)
 }
