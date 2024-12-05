@@ -75,7 +75,7 @@ func Blocks(filename string) <-chan (<-chan string) {
 					bch = nil
 				}
 				blank = true
-				return
+				continue
 			}
 
 			if blank {
