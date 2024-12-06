@@ -50,4 +50,41 @@ func main() {
 		}
 	}
 	log.Part1(len(visited))
+
+	// Part 2
+	obstacles := set.New[space.Point]()
+	for obsPos := range visited {
+		if grid[obsPos] == "#" {
+			continue
+		}
+		if obsPos == start {
+			continue
+		}
+
+		grid[obsPos] = "#"
+
+		pos = start
+		dir = space.Point{Y: -1}
+		visDir := map[space.Point]set.Set[space.Point]{}
+		for grid[pos] != "" && !visDir[pos].Contains(dir) {
+			if visDir[pos] == nil {
+				visDir[pos] = set.New[space.Point]()
+			}
+			visDir[pos].Add(dir)
+
+			switch grid[pos.Add(dir)] {
+			case "#":
+				dir = dir.Rot90(1)
+
+			default:
+				pos = pos.Add(dir)
+			}
+		}
+		if visDir[pos].Contains(dir) {
+			obstacles.Add(obsPos)
+		}
+
+		grid[obsPos] = "."
+	}
+	log.Part2(len(obstacles))
 }
