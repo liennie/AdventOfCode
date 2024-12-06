@@ -55,6 +55,8 @@ func (p Point) ManhattanLen() int {
 	return ints.Abs(p.X) + ints.Abs(p.Y)
 }
 
+// Rot90 rotates clockwise if positive x points right
+// and positive y points down.
 func (p Point) Rot90(s int) Point {
 	s = ints.Mod(s, 4)
 	for i := 0; i < s; i++ {
