@@ -122,3 +122,11 @@ func Line(filename string) string {
 
 	return strings.TrimSuffix(l, "\n")
 }
+
+func Parse[T any](filename string, parse func(line string) T) []T {
+	var res []T
+	for line := range lines(filename) {
+		res = append(res, parse(line))
+	}
+	return res
+}
