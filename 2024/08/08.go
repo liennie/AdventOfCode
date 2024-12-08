@@ -47,4 +47,23 @@ func main() {
 		}
 	}
 	log.Part1(len(antinodes))
+
+	// Part 2
+	antinodes = set.New[space.Point]()
+	for _, ant := range antennas {
+		for i := range len(ant) - 1 {
+			for j := i + 1; j < len(ant); j++ {
+				a, b := ant[i], ant[j]
+				d := b.Sub(a)
+
+				for antiA := a; aabb.Contains(antiA); antiA = antiA.Sub(d) {
+					antinodes.Add(antiA)
+				}
+				for antiB := b; aabb.Contains(antiB); antiB = antiB.Add(d) {
+					antinodes.Add(antiB)
+				}
+			}
+		}
+	}
+	log.Part2(len(antinodes))
 }
