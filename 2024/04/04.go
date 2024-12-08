@@ -9,8 +9,8 @@ import (
 
 func parse(filename string) map[space.Point]rune {
 	res := map[space.Point]rune{}
-	load.Grid(filename, func(x, y int, r rune) {
-		res[space.Point{x, y}] = r
+	load.Grid(filename, func(p space.Point, r rune) {
+		res[p] = r
 	})
 	return res
 }

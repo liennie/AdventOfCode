@@ -11,10 +11,10 @@ import (
 func parse(filename string) (map[rune][]space.Point, space.AABB) {
 	res := map[rune][]space.Point{}
 	aabb := space.AABB{}
-	load.Grid(filename, func(x, y int, r rune) {
-		aabb = aabb.Add(space.Point{x, y})
+	load.Grid(filename, func(p space.Point, r rune) {
+		aabb = aabb.Add(p)
 		if ('a' <= r && r <= 'z') || ('A' <= r && r <= 'Z') || ('0' <= r && r <= '9') {
-			res[r] = append(res[r], space.Point{x, y})
+			res[r] = append(res[r], p)
 		}
 	})
 	return res, aabb

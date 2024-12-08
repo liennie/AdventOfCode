@@ -11,13 +11,13 @@ import (
 func parse(filename string) (map[space.Point]rune, space.Point) {
 	res := map[space.Point]rune{}
 	start := space.Point{}
-	load.Grid(filename, func(x, y int, r rune) {
+	load.Grid(filename, func(p space.Point, r rune) {
 		if r == '^' {
 			r = '.'
-			start = space.Point{x, y}
+			start = p
 		}
 
-		res[space.Point{x, y}] = r
+		res[p] = r
 	})
 	return res, start
 }

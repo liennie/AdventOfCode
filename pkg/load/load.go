@@ -11,6 +11,7 @@ import (
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/set"
+	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
 func lines(filename string) iter.Seq[string] {
@@ -131,11 +132,11 @@ func Parse[T any](filename string, parse func(line string) T) []T {
 	return res
 }
 
-func Grid(filename string, cb func(x, y int, r rune)) {
+func Grid(filename string, cb func(p space.Point, r rune)) {
 	y := 0
 	for line := range lines(filename) {
 		for x, r := range line {
-			cb(x, y, r)
+			cb(space.Point{X: x, Y: y}, r)
 		}
 		y++
 	}
