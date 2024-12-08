@@ -1,23 +1,17 @@
 package main
 
 import (
-	"strings"
-
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
-func parse(filename string) map[space.Point]string {
-	res := map[space.Point]string{}
-	y := 0
-	for line := range load.File(filename) {
-		for x, letter := range strings.Split(line, "") {
-			res[space.Point{x, y}] = letter
-		}
-		y++
-	}
+func parse(filename string) map[space.Point]rune {
+	res := map[space.Point]rune{}
+	load.Grid(filename, func(x, y int, r rune) {
+		res[space.Point{x, y}] = r
+	})
 	return res
 }
 
@@ -38,7 +32,7 @@ func main() {
 		{0, -1},
 		{1, -1},
 	}
-	word := strings.Split("XMAS", "")
+	word := []rune("XMAS")
 
 	count := 0
 	for start := range grid {
@@ -56,16 +50,16 @@ func main() {
 	log.Part1(count)
 
 	// Part 2
-	patterns := []map[space.Point]string{
-		{{-1, 1}: "M", {-1, -1}: "M", {1, -1}: "S", {1, 1}: "S"},
-		{{-1, 1}: "S", {-1, -1}: "M", {1, -1}: "M", {1, 1}: "S"},
-		{{-1, 1}: "S", {-1, -1}: "S", {1, -1}: "M", {1, 1}: "M"},
-		{{-1, 1}: "M", {-1, -1}: "S", {1, -1}: "S", {1, 1}: "M"},
+	patterns := []map[space.Point]rune{
+		{{-1, 1}: 'M', {-1, -1}: 'M', {1, -1}: 'S', {1, 1}: 'S'},
+		{{-1, 1}: 'S', {-1, -1}: 'M', {1, -1}: 'M', {1, 1}: 'S'},
+		{{-1, 1}: 'S', {-1, -1}: 'S', {1, -1}: 'M', {1, 1}: 'M'},
+		{{-1, 1}: 'M', {-1, -1}: 'S', {1, -1}: 'S', {1, 1}: 'M'},
 	}
 
 	count = 0
 	for start := range grid {
-		if grid[start] != "A" {
+		if grid[start] != 'A' {
 			continue
 		}
 

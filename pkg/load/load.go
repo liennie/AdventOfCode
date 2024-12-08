@@ -130,3 +130,13 @@ func Parse[T any](filename string, parse func(line string) T) []T {
 	}
 	return res
 }
+
+func Grid(filename string, cb func(x, y int, r rune)) {
+	y := 0
+	for line := range lines(filename) {
+		for x, r := range line {
+			cb(x, y, r)
+		}
+		y++
+	}
+}

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strings"
-
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
@@ -10,21 +8,17 @@ import (
 	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
-func parse(filename string) (map[space.Point]string, space.Point) {
-	res := map[space.Point]string{}
+func parse(filename string) (map[space.Point]rune, space.Point) {
+	res := map[space.Point]rune{}
 	start := space.Point{}
-	y := 0
-	for line := range load.File(filename) {
-		for x, cell := range strings.Split(line, "") {
-			if cell == "^" {
-				cell = "."
-				start = space.Point{x, y}
-			}
-
-			res[space.Point{x, y}] = cell
+	load.Grid(filename, func(x, y int, r rune) {
+		if r == '^' {
+			r = '.'
+			start = space.Point{x, y}
 		}
-		y++
-	}
+
+		res[space.Point{x, y}] = r
+	})
 	return res, start
 }
 
@@ -38,11 +32,11 @@ func main() {
 	pos := start
 	dir := space.Point{Y: -1}
 	visited := set.New[space.Point]()
-	for grid[pos] != "" {
+	for grid[pos] != 0 {
 		visited.Add(pos)
 
 		switch grid[pos.Add(dir)] {
-		case "#":
+		case '#':
 			dir = dir.Rot90(1)
 
 		default:
@@ -54,26 +48,26 @@ func main() {
 	// Part 2
 	obstacles := set.New[space.Point]()
 	for obsPos := range visited {
-		if grid[obsPos] == "#" {
+		if grid[obsPos] == '#' {
 			continue
 		}
 		if obsPos == start {
 			continue
 		}
 
-		grid[obsPos] = "#"
+		grid[obsPos] = '#'
 
 		pos = start
 		dir = space.Point{Y: -1}
 		visDir := map[space.Point]set.Set[space.Point]{}
-		for grid[pos] != "" && !visDir[pos].Contains(dir) {
+		for grid[pos] != 0 && !visDir[pos].Contains(dir) {
 			if visDir[pos] == nil {
 				visDir[pos] = set.New[space.Point]()
 			}
 			visDir[pos].Add(dir)
 
 			switch grid[pos.Add(dir)] {
-			case "#":
+			case '#':
 				dir = dir.Rot90(1)
 
 			default:
@@ -84,7 +78,7 @@ func main() {
 			obstacles.Add(obsPos)
 		}
 
-		grid[obsPos] = "."
+		grid[obsPos] = '.'
 	}
 	log.Part2(len(obstacles))
 }
