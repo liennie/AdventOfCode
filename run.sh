@@ -22,6 +22,10 @@ if [ ! -f "$DIR/$INPUT" ]; then
 	fi
 
 	"$PREP"
+
+	if $(which code >/dev/null); then
+		code "$DIR/$DAY.go" "$DIR/test.txt"
+	fi
 fi
 
 cd "$DIR"
