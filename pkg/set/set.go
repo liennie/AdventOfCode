@@ -33,8 +33,20 @@ func (s Set[T]) Add(items ...T) {
 	}
 }
 
+func (s Set[T]) AddSeq(items iter.Seq[T]) {
+	for item := range items {
+		s[item] = struct{}{}
+	}
+}
+
 func (s Set[T]) Remove(items ...T) {
 	for _, item := range items {
+		delete(s, item)
+	}
+}
+
+func (s Set[T]) RemoveSeq(items iter.Seq[T]) {
+	for item := range items {
 		delete(s, item)
 	}
 }
@@ -48,8 +60,26 @@ func (s Set[T]) Contains(items ...T) bool {
 	return true
 }
 
+func (s Set[T]) ContainsSeq(items iter.Seq[T]) bool {
+	for item := range items {
+		if _, ok := s[item]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
 func (s Set[T]) Intersects(items ...T) bool {
 	for _, item := range items {
+		if _, ok := s[item]; ok {
+			return true
+		}
+	}
+	return false
+}
+
+func (s Set[T]) IntersectsSeq(items iter.Seq[T]) bool {
+	for item := range items {
 		if _, ok := s[item]; ok {
 			return true
 		}
@@ -72,6 +102,14 @@ func (s Set[T]) Pop() (T, bool) {
 	}
 	var zero T
 	return zero, false
+}
+
+func (s Set[T]) All() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for item := range s {
+			yield(item)
+		}
+	}
 }
 
 func (s Set[T]) String() string {
