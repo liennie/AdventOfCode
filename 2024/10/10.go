@@ -36,6 +36,25 @@ func peaks(topology map[space.Point]int, pos space.Point) set.Set[space.Point] {
 	return sc
 }
 
+func rating(topology map[space.Point]int, pos space.Point) int {
+	height := topology[pos]
+
+	if height == 9 {
+		return 1
+	}
+
+	sc := 0
+	for _, dir := range []space.Point{{1, 0}, {0, 1}, {-1, 0}, {0, -1}} {
+		next := pos.Add(dir)
+		nextHeight := topology[next]
+
+		if nextHeight == height+1 {
+			sc += rating(topology, next)
+		}
+	}
+	return sc
+}
+
 func main() {
 	defer evil.Recover(log.Err)
 	filename := load.Filename()
@@ -50,4 +69,13 @@ func main() {
 		}
 	}
 	log.Part1(sum)
+
+	// Part 2
+	sum = 0
+	for pos, height := range topology {
+		if height == 0 {
+			sum += rating(topology, pos)
+		}
+	}
+	log.Part2(sum)
 }
