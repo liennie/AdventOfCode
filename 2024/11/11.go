@@ -13,25 +13,18 @@ func parse(filename string) []int {
 	return evil.Fields(load.Line(filename))
 }
 
-var blinkRuleBuf = make([]int, 2)
-
-// uses global buffer, cannot be called concurrently
 func blinkRule(stone int) []int {
 	if stone == 0 {
-		blinkRuleBuf[0] = 1
-		return blinkRuleBuf[:1]
+		return []int{1}
 	}
 
 	if s := strconv.Itoa(stone); len(s)%2 == 0 {
 		p := ints.Pow(10, len(s)/2)
 
-		blinkRuleBuf[0] = stone / p
-		blinkRuleBuf[1] = stone % p
-		return blinkRuleBuf
+		return []int{stone / p, stone % p}
 	}
 
-	blinkRuleBuf[0] = stone * 2024
-	return blinkRuleBuf[:1]
+	return []int{stone * 2024}
 }
 
 func blink(stones map[int]int, res map[int]int) {
