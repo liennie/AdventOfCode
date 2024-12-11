@@ -2,6 +2,8 @@ package ints
 
 import (
 	"math"
+
+	"github.com/liennie/AdventOfCode/pkg/evil"
 )
 
 func Mod(a, b int) int {
@@ -17,6 +19,16 @@ func Abs(i int) int {
 		return -i
 	}
 	return i
+}
+
+func Pow(n, exp int) int {
+	evil.Assert(exp >= 0, "negative exponent ", exp)
+
+	res := 1
+	for range exp {
+		res *= n
+	}
+	return res
 }
 
 func Clamp(a, min, max int) int {
