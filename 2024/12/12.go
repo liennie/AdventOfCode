@@ -34,6 +34,48 @@ func perimeter(region set.Set[space.Point]) int {
 	return total
 }
 
+func sides(region set.Set[space.Point]) int {
+	fences := map[space.Point3]set.RangeSet{}
+
+	for p := range region {
+		for d := range space.Orthogonal() {
+			if region.Contains(p.Add(d)) {
+				continue
+			}
+
+			horizontal := d.X != 0
+			k := space.Point3{}
+			if horizontal {
+				k = space.Point3{
+					X: d.X,
+					Z: p.X,
+				}
+			} else {
+				k = space.Point3{
+					Y: d.Y,
+					Z: p.Y,
+				}
+			}
+
+			if fences[k] == nil {
+				fences[k] = set.RangeSet{}
+			}
+
+			if horizontal {
+				fences[k].Add(set.Range{p.Y, p.Y + 1})
+			} else {
+				fences[k].Add(set.Range{p.X, p.X + 1})
+			}
+		}
+	}
+
+	total := 0
+	for _, rs := range fences {
+		total += len(rs)
+	}
+	return total
+}
+
 func getRegion(seed space.Point, plots map[space.Point]rune, region set.Set[space.Point]) {
 	region.Add(seed)
 
@@ -75,4 +117,11 @@ func main() {
 		total += area(region) * perimeter(region)
 	}
 	log.Part1(total)
+
+	// Part 2
+	total = 0
+	for _, region := range regions {
+		total += area(region) * sides(region)
+	}
+	log.Part2(total)
 }
