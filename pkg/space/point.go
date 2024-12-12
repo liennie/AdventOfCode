@@ -1,6 +1,8 @@
 package space
 
 import (
+	"iter"
+
 	"github.com/liennie/AdventOfCode/pkg/ints"
 )
 
@@ -69,5 +71,15 @@ func (p Point) Flip() Point {
 	return Point{
 		X: -p.X,
 		Y: -p.Y,
+	}
+}
+
+func Orthogonal() iter.Seq[Point] {
+	return func(yield func(Point) bool) {
+		for _, d := range [...]Point{{1, 0}, {0, 1}, {-1, 0}, {0, -1}} {
+			if !yield(d) {
+				return
+			}
+		}
 	}
 }
