@@ -29,7 +29,7 @@ func parse(filename string) map[space.Point]object {
 		}
 
 		for i := 1; i < len(path); i++ {
-			v := path[i].Sub(path[i-1]).Normalize()
+			v := path[i].Sub(path[i-1]).Norm()
 
 			for p := path[i-1]; !p.Equals(path[i]); p = p.Add(v) {
 				res[p] = rock

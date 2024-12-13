@@ -10,8 +10,8 @@ type Point struct {
 	X, Y int
 }
 
-func (p Point) Normalize() Point {
-	gcd := ints.GCD(ints.Abs(p.X), ints.Abs(p.Y))
+func (p Point) Norm() Point {
+	gcd := ints.GCD(p.X, p.Y)
 	if gcd == 0 {
 		return p
 	}

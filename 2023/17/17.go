@@ -33,11 +33,11 @@ func (g Graph) Edges(n Node) []path.Edge[Node] {
 	edges := []path.Edge[Node]{}
 
 	for _, dir := range []space.Point{{X: 1}, {Y: -1}, {X: -1}, {Y: 1}} {
-		if n.from.Normalize().Flip() == dir {
+		if n.from.Norm().Flip() == dir {
 			continue
 		}
 
-		if n.from.Normalize() == dir {
+		if n.from.Norm() == dir {
 			npos := n.pos.Add(dir)
 			if !g.aabb.Contains(npos) {
 				continue

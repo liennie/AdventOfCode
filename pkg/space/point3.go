@@ -8,8 +8,8 @@ type Point3 struct {
 	X, Y, Z int
 }
 
-func (p Point3) Normalize() Point3 {
-	gcd := ints.GCD(ints.GCD(ints.Abs(p.X), ints.Abs(p.Y)), ints.Abs(p.Z))
+func (p Point3) Norm() Point3 {
+	gcd := ints.GCD(ints.GCD(p.X, p.Y), p.Z)
 	return Point3{
 		X: p.X / gcd,
 		Y: p.Y / gcd,

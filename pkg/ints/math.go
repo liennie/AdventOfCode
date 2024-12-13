@@ -102,6 +102,8 @@ func SumFunc[T any](f func(T) int, ts ...T) int {
 }
 
 func GCD(a, b int) int {
+	a = Abs(a)
+	b = Abs(b)
 	for b != 0 {
 		a, b = b, a%b
 	}
@@ -109,5 +111,7 @@ func GCD(a, b int) int {
 }
 
 func LCM(a, b int) int {
-	return Abs(a*b) / GCD(a, b)
+	a = Abs(a)
+	b = Abs(b)
+	return (a * b) / GCD(a, b)
 }

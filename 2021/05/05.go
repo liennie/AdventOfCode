@@ -22,7 +22,7 @@ func (l line) isVertical() bool {
 }
 
 func (l line) dir() space.Point {
-	return l.end.Sub(l.start).Normalize()
+	return l.end.Sub(l.start).Norm()
 }
 
 func parse(filename string) []line {
