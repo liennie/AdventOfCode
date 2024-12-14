@@ -101,6 +101,22 @@ func SumFunc[T any](f func(T) int, ts ...T) int {
 	return sum
 }
 
+func Product(s ...int) int {
+	prod := 1
+	for _, n := range s {
+		prod *= n
+	}
+	return prod
+}
+
+func ProductFunc[T any](f func(T) int, ts ...T) int {
+	prod := 1
+	for _, t := range ts {
+		prod *= f(t)
+	}
+	return prod
+}
+
 func GCD(a, b int) int {
 	a = Abs(a)
 	b = Abs(b)
@@ -111,7 +127,5 @@ func GCD(a, b int) int {
 }
 
 func LCM(a, b int) int {
-	a = Abs(a)
-	b = Abs(b)
-	return (a * b) / GCD(a, b)
+	return Abs(a*b) / GCD(a, b)
 }
