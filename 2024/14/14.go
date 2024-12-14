@@ -1,7 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"math"
 	"regexp"
+	"slices"
+	"strconv"
+	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/ints"
@@ -36,6 +41,58 @@ func parse(filename string) []Robot {
 	return res
 }
 
+func printRobots(robots []Robot, max space.Point) {
+	cnts := map[space.Point]int{}
+	for _, robot := range robots {
+		cnts[robot.pos]++
+	}
+
+	fmt.Println(strings.Repeat("=", max.X))
+	for y := range max.Y {
+		for x := range max.X {
+			if n, ok := cnts[space.Point{x, y}]; ok {
+				if n < 10 {
+					fmt.Print(strconv.Itoa(n))
+				} else {
+					fmt.Print("X")
+				}
+			} else {
+				fmt.Print(".")
+			}
+		}
+		fmt.Println()
+	}
+}
+
+func medNearest(robots []Robot) float64 {
+	dist := make([]float64, len(robots))
+	for i, robot := range robots {
+		min := math.Inf(1)
+		for j, other := range robots {
+			if i == j {
+				continue
+			}
+
+			diff := robot.pos.Sub(other.pos)
+			dist := math.Sqrt(float64(diff.X)*float64(diff.X) + float64(diff.Y)*float64(diff.Y))
+			if dist < min {
+				min = dist
+			}
+		}
+		dist[i] = min
+	}
+
+	slices.Sort(dist)
+	return dist[len(dist)/2]
+}
+
+func moveRobots(robots []Robot, by int, max space.Point) {
+	for i := range robots {
+		robot := &robots[i]
+		robot.pos = robot.pos.Add(robot.vel.Scale(by)).Mod(max)
+	}
+}
+
 func main() {
 	defer evil.Recover(log.Err)
 	filename := load.Filename()
@@ -48,15 +105,12 @@ func main() {
 	}
 
 	// Part 1
-	t := 100
-	for i := range robots {
-		robot := &robots[i]
-		robot.pos = robot.pos.Add(robot.vel.Scale(t)).Mod(max)
-	}
+	futureRobots := slices.Clone(robots)
+	moveRobots(futureRobots, 100, max)
 
 	mid := max.Div(space.Point{X: 2, Y: 2})
 	f := [4]int{}
-	for _, robot := range robots {
+	for _, robot := range futureRobots {
 		if robot.pos.X == mid.X || robot.pos.Y == mid.Y {
 			continue
 		}
@@ -72,4 +126,20 @@ func main() {
 		f[i]++
 	}
 	log.Part1(ints.Product(f[:]...))
+
+	// Part 2
+	t := 0
+	min := math.Inf(1)
+	minT := 0
+	for range ints.LCM(max.X, max.Y) {
+		moveRobots(robots, 1, max)
+		t++
+
+		m := medNearest(robots)
+		if m < min {
+			min = m
+			minT = t
+		}
+	}
+	log.Part2(minT)
 }
