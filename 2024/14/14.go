@@ -64,12 +64,12 @@ func printRobots(robots []Robot, max space.Point) {
 	}
 }
 
-func medNearest(robots []Robot) float64 {
-	dist := make([]float64, len(robots))
-	for i, robot := range robots {
+func avgNearest(robots []Robot) float64 {
+	sum := 0.
+	for _, robot := range robots {
 		min := math.Inf(1)
-		for j, other := range robots {
-			if i == j {
+		for _, other := range robots {
+			if robot.pos == other.pos {
 				continue
 			}
 
@@ -79,11 +79,10 @@ func medNearest(robots []Robot) float64 {
 				min = dist
 			}
 		}
-		dist[i] = min
+		sum += min
 	}
 
-	slices.Sort(dist)
-	return dist[len(dist)/2]
+	return sum / float64(len(robots))
 }
 
 func moveRobots(robots []Robot, by int, max space.Point) {
@@ -135,7 +134,7 @@ func main() {
 		moveRobots(robots, 1, max)
 		t++
 
-		m := medNearest(robots)
+		m := avgNearest(robots)
 		if m < min {
 			min = m
 			minT = t
