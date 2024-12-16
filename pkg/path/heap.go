@@ -4,7 +4,7 @@ type path[N comparable] struct {
 	len  int
 	h    int
 	node N
-	prev *path[N]
+	prev []*path[N]
 	idx  int
 }
 

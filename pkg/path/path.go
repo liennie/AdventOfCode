@@ -3,6 +3,7 @@ package path
 import (
 	"container/heap"
 	"errors"
+	"slices"
 )
 
 type Edge[N comparable] struct {
@@ -45,7 +46,32 @@ func EndConst[N comparable](e N) End[N] {
 
 var ErrNotFound = errors.New("path not found")
 
-func shortest[N comparable](g AStarGraph[N], start N, end End[N]) ([]N, int, error) {
+func getPaths[N comparable](p *path[N]) [][]N {
+	path := []N{}
+	for {
+		path = append(path, p.node)
+		switch len(p.prev) {
+		case 0:
+			slices.Reverse(path)
+			return [][]N{path}
+
+		case 1:
+			p = p.prev[0]
+
+		default:
+			slices.Reverse(path)
+			var paths [][]N
+			for _, prev := range p.prev {
+				for _, prevPath := range getPaths(prev) {
+					paths = append(paths, append(prevPath, path...))
+				}
+			}
+			return paths
+		}
+	}
+}
+
+func shortest[N comparable](g AStarGraph[N], start N, end End[N], all bool) ([][]N, int, error) {
 	h := &pathHeap[N]{}
 	sp := &path[N]{node: start}
 	shortest := map[N]*path[N]{
@@ -57,16 +83,7 @@ func shortest[N comparable](g AStarGraph[N], start N, end End[N]) ([]N, int, err
 		p := heap.Pop(h).(*path[N])
 
 		if end.IsEnd(p.node) {
-			path := []N{}
-
-			for p := p; p != nil; p = p.prev {
-				path = append(path, p.node)
-			}
-			for i, j := 0, len(path)-1; i < j; i, j = i+1, j-1 {
-				path[i], path[j] = path[j], path[i]
-			}
-
-			return path, p.len, nil
+			return getPaths(p), p.len, nil
 		}
 
 		for _, edge := range g.Edges(p.node) {
@@ -74,20 +91,26 @@ func shortest[N comparable](g AStarGraph[N], start N, end End[N]) ([]N, int, err
 			k := g.Heuristic(edge.To)
 
 			if s, ok := shortest[edge.To]; ok {
-				if l+k >= s.len+s.h {
+				if l+k > s.len+s.h {
 					continue
+				} else if l+k == s.len+s.h {
+					if all {
+						s.prev = append(s.prev, p)
+					} else {
+						continue
+					}
+				} else {
+					s.len = l
+					s.h = k
+					s.prev = []*path[N]{p}
+					heap.Fix(h, s.idx)
 				}
-
-				s.len = l
-				s.h = k
-				s.prev = p
-				heap.Fix(h, s.idx)
 			} else {
 				np := &path[N]{
 					len:  l,
 					h:    k,
 					node: edge.To,
-					prev: p,
+					prev: []*path[N]{p},
 				}
 				shortest[edge.To] = np
 				heap.Push(h, np)
@@ -105,8 +128,23 @@ type dijkstraGraph[N comparable] struct {
 func (dijkstraGraph[N]) Heuristic(N) int { return 0 }
 
 func Shortest[N comparable](g Graph[N], start N, end End[N]) ([]N, int, error) {
-	if ag, ok := g.(AStarGraph[N]); ok {
-		return shortest(ag, start, end)
+	var ag AStarGraph[N]
+	var ok bool
+	if ag, ok = g.(AStarGraph[N]); !ok {
+		ag = dijkstraGraph[N]{g}
 	}
-	return shortest(dijkstraGraph[N]{g}, start, end)
+	paths, l, err := shortest(ag, start, end, false)
+	if len(paths) > 0 {
+		return paths[0], l, err
+	}
+	return nil, l, err
+}
+
+// AllShortest might not actually return all paths
+// if there are multiple nodes that lead to the end node.
+// It works if the end node is a dead end.
+// It also doesn't work properly if the graph is an A*, so the Heuristic method
+// is not used here.
+func AllShortest[N comparable](g Graph[N], start N, end End[N]) ([][]N, int, error) {
+	return shortest(dijkstraGraph[N]{g}, start, end, true)
 }
