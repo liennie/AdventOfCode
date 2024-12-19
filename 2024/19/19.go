@@ -26,9 +26,9 @@ func parse(filename string) (patterns []string, designs []string) {
 	return
 }
 
-var cache = map[string]bool{}
+var cache = map[string]int{}
 
-func designPossible(design string, patterns []string) (possible bool) {
+func designPossible(design string, patterns []string) (possible int) {
 	if possible, ok := cache[design]; ok {
 		return possible
 	}
@@ -37,18 +37,16 @@ func designPossible(design string, patterns []string) (possible bool) {
 	}()
 
 	if len(design) == 0 {
-		return true
+		return 1
 	}
 
 	for _, pattern := range patterns {
 		if strings.HasPrefix(design, pattern) {
-			if designPossible(design[len(pattern):], patterns) {
-				return true
-			}
+			possible += designPossible(design[len(pattern):], patterns)
 		}
 	}
 
-	return false
+	return
 }
 
 func main() {
@@ -64,9 +62,16 @@ func main() {
 	// Part 1
 	count := 0
 	for _, design := range designs {
-		if designPossible(design, patterns) {
+		if designPossible(design, patterns) > 0 {
 			count++
 		}
 	}
 	log.Part1(count)
+
+	// Part 2
+	count = 0
+	for _, design := range designs {
+		count += designPossible(design, patterns)
+	}
+	log.Part2(count)
 }
