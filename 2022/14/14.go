@@ -99,5 +99,5 @@ sand:
 			}
 		}
 	}
-	log.Part1(count)
+	log.Part2(count)
 }
