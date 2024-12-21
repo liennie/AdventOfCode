@@ -1,12 +1,11 @@
 package main
 
 import (
-	"cmp"
 	"maps"
-	"slices"
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 	"github.com/liennie/AdventOfCode/pkg/set"
@@ -17,7 +16,9 @@ func parse(filename string) []string {
 	return load.Slice(filename)
 }
 
-func parseKeypad(keys string) map[rune]space.Point {
+type keypad = map[rune]space.Point
+
+func parseKeypad(keys string) keypad {
 	keys = strings.TrimSpace(keys)
 	res := map[rune]space.Point{}
 	for y, line := range strings.Split(keys, "\n") {
@@ -31,6 +32,20 @@ func parseKeypad(keys string) map[rune]space.Point {
 	}
 	return res
 }
+
+var numpad = parseKeypad(`
+	789
+	456
+	123
+	-0A
+`)
+
+var arrowpad = parseKeypad(`
+	-^A
+	<v>
+`)
+
+var actionpad = parseKeypad(`A`)
 
 func arrowLine(dir space.Point) string {
 	if dir == (space.Point{X: 0, Y: 0}) {
@@ -57,45 +72,105 @@ func arrowLine(dir space.Point) string {
 	return ""
 }
 
-func robotMovement(keypad map[rune]space.Point, sequence string) []string {
+func keypadForKeys(from, to rune) keypad {
+	switch from {
+	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		return numpad
+	case '<', '>', '^', 'v':
+		return arrowpad
+	case 'A':
+		switch to {
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			return numpad
+		case '<', '>', '^', 'v':
+			return arrowpad
+		case 'A':
+			return actionpad
+		default:
+			evil.Panic("unknown key %c", to)
+		}
+	default:
+		evil.Panic("unknown key %c", from)
+	}
+	return nil
+}
+
+type robotMovementCacheKey struct {
+	from, to rune
+}
+
+var robotMovementCache = map[robotMovementCacheKey][]string{}
+
+func robotMovement(from, to rune) (res []string) {
+	key := robotMovementCacheKey{from, to}
+	if res, ok := robotMovementCache[key]; ok {
+		return res
+	}
+	defer func() {
+		robotMovementCache[key] = res
+	}()
+
+	keypad := keypadForKeys(from, to)
+
 	validKeys := set.Collect(maps.Values(keypad))
 
-	res := []string{""}
-	cur, ok := keypad['A']
-	evil.Assert(ok, "keypad is missing A")
+	cur, ok := keypad[from]
+	evil.Assert(ok, "keypad is missing ", string(from))
 
-	for _, button := range sequence {
-		target, ok := keypad[button]
-		evil.Assert(ok, "keypad is missing button ", string(button))
+	target, ok := keypad[to]
+	evil.Assert(ok, "keypad is missing ", string(to))
 
-		var arrows []string
-		movement := target.Sub(cur)
-
-		if movement == (space.Point{X: 0, Y: 0}) {
-			arrows = append(arrows, "")
-		} else {
-			// this assumes missing button is only in one corner
-			if validKeys.Contains(cur.Add(space.Point{X: movement.X})) && movement.X != 0 {
-				// horizontal first
-				arrows = append(arrows, arrowLine(space.Point{X: movement.X})+arrowLine(space.Point{Y: movement.Y}))
-			}
-			if validKeys.Contains(cur.Add(space.Point{Y: movement.Y})) && movement.Y != 0 {
-				// vertical first
-				arrows = append(arrows, arrowLine(space.Point{Y: movement.Y})+arrowLine(space.Point{X: movement.X}))
-			}
+	movement := target.Sub(cur)
+	if movement == (space.Point{X: 0, Y: 0}) {
+		res = append(res, "A")
+	} else {
+		// this assumes missing button is only in one corner
+		if validKeys.Contains(cur.Add(space.Point{X: movement.X})) && movement.X != 0 {
+			// horizontal first
+			res = append(res, arrowLine(space.Point{X: movement.X})+arrowLine(space.Point{Y: movement.Y})+"A")
 		}
-		cur = target
-
-		next := make([]string, 0, len(res)*len(arrows))
-		for _, first := range res {
-			for _, second := range arrows {
-				next = append(next, first+second+"A")
-			}
+		if validKeys.Contains(cur.Add(space.Point{Y: movement.Y})) && movement.Y != 0 {
+			// vertical first
+			res = append(res, arrowLine(space.Point{Y: movement.Y})+arrowLine(space.Point{X: movement.X})+"A")
 		}
-		res = next
+	}
+	return res
+}
+
+type sequenceLenCacheKey struct {
+	code      string
+	arrowpads int
+}
+
+var sequenceLenCache = map[sequenceLenCacheKey]int{}
+
+func sequenceLen(code string, arrowpads int) (res int) {
+	key := sequenceLenCacheKey{code, arrowpads}
+	if res, ok := sequenceLenCache[key]; ok {
+		return res
+	}
+	defer func() {
+		sequenceLenCache[key] = res
+	}()
+
+	if arrowpads < 0 {
+		return len(code)
 	}
 
-	return res
+	total := 0
+	from := 'A'
+	for _, to := range code {
+		total += ints.MinFunc(func(s string) int {
+			return sequenceLen(s, arrowpads-1)
+		}, robotMovement(from, to)...)
+
+		from = to
+	}
+	return total
+}
+
+func complexity(code string, arrowpads int) int {
+	return sequenceLen(code, arrowpads) * evil.Atoi(code[:len(code)-1])
 }
 
 func main() {
@@ -105,41 +180,16 @@ func main() {
 	codes := parse(filename)
 
 	// Part 1
-	numpad := parseKeypad(`
-		789
-		456
-		123
-		-0A
-	`)
-	arrows := parseKeypad(`
-		-^A
-		<v>
-	`)
-
-	keypads := []map[rune]space.Point{
-		numpad, arrows, arrows,
-	}
-
 	total := 0
 	for _, code := range codes {
-		sequences := []string{code}
-		for _, keypad := range keypads {
-			var next []string
-			for _, sequence := range sequences {
-				next = append(next, robotMovement(keypad, sequence)...)
-			}
-
-			slices.SortFunc(next, func(a, b string) int {
-				return cmp.Compare(len(a), len(b))
-			})
-			if i := slices.IndexFunc(next, func(a string) bool { return len(a) > len(next[0]) }); i >= 0 {
-				next = next[:i]
-			}
-
-			sequences = next
-		}
-
-		total += len(sequences[0]) * evil.Atoi(code[:len(code)-1])
+		total += complexity(code, 2)
 	}
 	log.Part1(total)
+
+	// Part 2
+	total = 0
+	for _, code := range codes {
+		total += complexity(code, 25)
+	}
+	log.Part2(total)
 }
