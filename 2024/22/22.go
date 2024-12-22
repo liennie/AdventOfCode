@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"slices"
+
 	"github.com/liennie/AdventOfCode/pkg/evil"
 	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
@@ -14,13 +17,12 @@ func parse(filename string) []int {
 }
 
 func next(secret int) int {
-	// this can all be done using bitwise ops
-	secret ^= secret * 64
-	secret %= 16777216
-	secret ^= secret / 32
-	secret %= 16777216
-	secret ^= secret * 2048
-	secret %= 16777216
+	secret ^= secret << 6  // secret * 64
+	secret &= 16777216 - 1 // % 16777216
+	secret ^= secret >> 5  // secret / 32
+	secret &= 16777216 - 1 // % 16777216
+	secret ^= secret << 11 // secret * 2048
+	secret &= 16777216 - 1 // % 16777216
 	return secret
 }
 
@@ -30,11 +32,54 @@ func main() {
 
 	secrets := parse(filename)
 
+	const gen = 2000
+
 	// Part 1
-	for i := range secrets {
-		for range 2000 {
-			secrets[i] = next(secrets[i])
+	secretsCpy := slices.Clone(secrets)
+	for i := range secretsCpy {
+		for range gen {
+			secretsCpy[i] = next(secretsCpy[i])
 		}
 	}
-	log.Part1(ints.Sum(secrets...))
+	log.Part1(ints.Sum(secretsCpy...))
+
+	// Part 2
+	const seqLen = 4
+
+	total := map[string]int{}
+	first := map[string]int{}
+	changeBuf := make([]int, 0, gen)
+	for i := range secrets {
+		clear(first)
+		changes := changeBuf[:0]
+		for range gen {
+			prev := secrets[i] % 10
+			secrets[i] = next(secrets[i])
+			diff := secrets[i]%10 - prev
+
+			changes = append(changes, diff)
+			if len(changes) > seqLen {
+				changes = changes[len(changes)-seqLen:]
+			}
+			if len(changes) == seqLen {
+				key := fmt.Sprint(changes)
+				if _, ok := first[key]; !ok {
+					first[key] = secrets[i] % 10
+				}
+			}
+		}
+		for key, val := range first {
+			total[key] += val
+		}
+	}
+	max := 0
+	maxSeq := ""
+	for seq, val := range total {
+		if val > max {
+			max = val
+			maxSeq = seq
+		}
+	}
+	log.Print(maxSeq)
+	log.Part2(max)
 }
