@@ -1,6 +1,7 @@
 package main
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/liennie/AdventOfCode/pkg/evil"
@@ -39,8 +40,8 @@ func main() {
 	// Part 1
 	total := 0
 	for computer, connections := range computers {
-		for left := range connections.All() {
-			for right := range connections.All() {
+		for left := range connections {
+			for right := range connections {
 				if left == right {
 					continue
 				}
@@ -55,4 +56,29 @@ func main() {
 	}
 	total /= 6 // we count each triplet six times
 	log.Part1(total)
+
+	// Part 2
+	max := 0
+	password := ""
+	for computer, connections := range computers {
+		subsets := []set.Set[string]{set.New(computer)}
+		for conn := range connections {
+			for i := len(subsets) - 1; i >= 0; i-- {
+				if computers[conn].ContainsSeq(subsets[i].All()) {
+					new := subsets[i].Clone()
+					new.Add(conn)
+					subsets = append(subsets, new)
+				}
+			}
+		}
+
+		for _, subset := range subsets {
+			size := len(subset)
+			if size > max {
+				max = size
+				password = strings.Join(slices.Sorted(subset.All()), ",")
+			}
+		}
+	}
+	log.Part2(password)
 }

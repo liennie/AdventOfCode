@@ -107,7 +107,9 @@ func (s Set[T]) Pop() (T, bool) {
 func (s Set[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for item := range s {
-			yield(item)
+			if !yield(item) {
+				return
+			}
 		}
 	}
 }
