@@ -176,7 +176,7 @@ func main() {
 		next := "in"
 		for next != "R" && next != "A" {
 			w, ok := workflows[next]
-			evil.Assert(ok)
+			evil.Assert(ok, "missing workflow %s", next)
 
 			next = w.eval(part)
 		}
@@ -216,7 +216,7 @@ func main() {
 		evil.Assert(!done.Contains(next.next), "loop detected")
 
 		w, ok := workflows[next.next]
-		evil.Assert(ok)
+		evil.Assert(ok, "missing workflow %s", next.next)
 
 		nexts = append(nexts, w.multiEval(next.part)...)
 		done.Add(next.next)

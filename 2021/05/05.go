@@ -60,7 +60,7 @@ func main() {
 		if l.isHorizontal() || l.isVertical() {
 			dir := l.dir()
 
-			for p := l.start; !p.Equals(l.end); p = p.Add(dir) {
+			for p := l.start; p != l.end; p = p.Add(dir) {
 				diag[p]++
 			}
 			diag[l.end]++
@@ -81,7 +81,7 @@ func main() {
 	for _, l := range lines {
 		dir := l.dir()
 
-		for p := l.start; !p.Equals(l.end); p = p.Add(dir) {
+		for p := l.start; p != l.end; p = p.Add(dir) {
 			diag[p]++
 		}
 		diag[l.end]++

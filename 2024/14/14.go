@@ -25,7 +25,7 @@ func parse(filename string) []Robot {
 	var res []Robot
 	for line := range load.File(filename) {
 		match := re.FindStringSubmatch(line)
-		evil.Assert(match != nil, "line '", line, "' does not match regexp '", re.String(), "'")
+		evil.Assert(match != nil, "line %q does not match regexp %q", line, re.String())
 
 		res = append(res, Robot{
 			pos: space.Point{

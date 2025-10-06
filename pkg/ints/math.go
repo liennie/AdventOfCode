@@ -22,7 +22,7 @@ func Abs(i int) int {
 }
 
 func Pow(n, exp int) int {
-	evil.Assert(exp >= 0, "negative exponent ", exp)
+	evil.Assert(exp >= 0, "negative exponent %d", exp)
 
 	res := 1
 	for range exp {
@@ -39,6 +39,10 @@ func Clamp(a, min, max int) int {
 		return max
 	}
 	return a
+}
+
+func Wrap(a, min, max int) int {
+	return Mod((a-min), (max-min+1)) + min
 }
 
 func Min(ns ...int) int {

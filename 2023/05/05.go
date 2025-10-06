@@ -34,20 +34,20 @@ func parse(filename string) ([]int, []map[set.Range]int) {
 		name := strings.TrimSuffix(<-block, " map:")
 
 		i, ok := mapIndex[name]
-		evil.Assert(ok, "invalid map ", name)
+		evil.Assert(ok, "invalid map %s", name)
 
 		m := map[set.Range]int{}
 		maps[i] = m
 
 		for line := range block {
 			n := evil.Split(line, " ")
-			evil.Assert(len(n) == 3, "invalid mapping ", n)
+			evil.Assert(len(n) == 3, "invalid mapping %v", n)
 
 			m[set.Range{Min: n[1], Max: n[1] + n[2] - 1}] = n[0]
 		}
 	}
 	for i, m := range maps {
-		evil.Assert(m != nil, "missing map ", i)
+		evil.Assert(m != nil, "missing map %d", i)
 	}
 
 	return seeds, maps

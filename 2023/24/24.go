@@ -67,7 +67,7 @@ func intersect2(a, b Line2) (float64, float64) {
 	x := (b.c - a.c) / (a.k - b.k)
 	y := x*a.k + a.c
 	y2 := x*b.k + b.c
-	evil.Assert(almostEquals(y, y2), a, b, x, y, y2, y-y2)
+	evil.Assert(almostEquals(y, y2), "%v, %v, %v, %v, %v, %v", a, b, x, y, y2, y-y2)
 	return x, y
 }
 

@@ -25,7 +25,7 @@ var _ Graph[int] = GraphFunc[int](nil)
 
 type AStarGraph[N comparable] interface {
 	Graph[N]
-	Heuristic(N) int
+	ShortestRemainigDist(N) int
 }
 
 type End[N comparable] interface {
@@ -88,7 +88,7 @@ func shortest[N comparable](g AStarGraph[N], start N, end End[N], all bool) ([][
 
 		for _, edge := range g.Edges(p.node) {
 			l := p.len + edge.Len
-			k := g.Heuristic(edge.To)
+			k := g.ShortestRemainigDist(edge.To)
 
 			if s, ok := shortest[edge.To]; ok {
 				if l+k > s.len+s.h {
@@ -125,7 +125,7 @@ type dijkstraGraph[N comparable] struct {
 	Graph[N]
 }
 
-func (dijkstraGraph[N]) Heuristic(N) int { return 0 }
+func (dijkstraGraph[N]) ShortestRemainigDist(N) int { return 0 }
 
 func Shortest[N comparable](g Graph[N], start N, end End[N]) ([]N, int, error) {
 	var ag AStarGraph[N]

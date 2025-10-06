@@ -232,7 +232,7 @@ func main() {
 		os.Exit(1)
 		return
 	}
-	if day > 25 {
+	if day < 0 || day > 25 {
 		log.Printf("🔴 Invalid day %d", day)
 		os.Exit(1)
 		return

@@ -54,7 +54,7 @@ func main() {
 
 	corrupted := set.New(bytes[:fallen]...)
 	_, steps, err := path.Shortest(graph(aabb, corrupted), aabb.Min, path.EndConst(aabb.Max))
-	evil.Assert(err == nil, "path not found: ", err)
+	evil.Assert(err == nil, "path not found: %w", err)
 
 	log.Part1(steps)
 

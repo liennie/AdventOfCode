@@ -147,7 +147,7 @@ func main() {
 		maxPipe = space.Point{X: max(maxPipe.X, cur.X), Y: max(maxPipe.Y, cur.Y)}
 
 		// Part 1
-		evil.Assert(ok, "missing pipe at ", cur)
+		evil.Assert(ok, "missing pipe at %v", cur)
 		prev, cur = cur, nPipe.next(prev)
 		total++
 	}

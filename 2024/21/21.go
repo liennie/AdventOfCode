@@ -52,7 +52,7 @@ func arrowLine(dir space.Point) string {
 		return ""
 	}
 
-	evil.Assert((dir.X == 0) != (dir.Y == 0), "no diagonal vectors are allowed ", dir)
+	evil.Assert((dir.X == 0) != (dir.Y == 0), "no diagonal vectors are allowed %v", dir)
 
 	switch {
 	case dir.X > 0:
@@ -115,10 +115,10 @@ func robotMovement(from, to rune) (res []string) {
 	validKeys := set.Collect(maps.Values(keypad))
 
 	cur, ok := keypad[from]
-	evil.Assert(ok, "keypad is missing ", string(from))
+	evil.Assert(ok, "keypad is missing %c", from)
 
 	target, ok := keypad[to]
-	evil.Assert(ok, "keypad is missing ", string(to))
+	evil.Assert(ok, "keypad is missing %c", to)
 
 	movement := target.Sub(cur)
 	if movement == (space.Point{X: 0, Y: 0}) {

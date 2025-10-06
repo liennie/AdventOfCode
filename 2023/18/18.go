@@ -90,7 +90,7 @@ func dig(plans []Plan) int {
 		total += x * l.Y
 		tl += plan.l
 	}
-	evil.Assert(pos == space.Point{})
+	evil.Assert(pos == space.Point{}, "plan does not end at start")
 
 	total += tl/2 + 1
 

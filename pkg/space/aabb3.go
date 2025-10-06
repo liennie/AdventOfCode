@@ -1,6 +1,8 @@
 package space
 
 import (
+	"iter"
+
 	"github.com/liennie/AdventOfCode/pkg/ints"
 )
 
@@ -58,5 +60,53 @@ func (aabb AABB3) Expand(n int) AABB3 {
 		Valid: true,
 		Min:   aabb.Min.Add(Point3{-n, -n, -n}),
 		Max:   aabb.Max.Add(Point3{n, n, n}),
+	}
+}
+
+func (aabb AABB3) Size() Point3 {
+	if !aabb.Valid {
+		return Point3{0, 0, 0}
+	}
+
+	return aabb.Max.Sub(aabb.Min).Add(Point3{1, 1, 1})
+}
+
+func (aabb AABB3) Clamp(p Point3) Point3 {
+	if !aabb.Valid {
+		return p
+	}
+	return Point3{
+		X: ints.Clamp(p.X, aabb.Min.X, aabb.Max.X),
+		Y: ints.Clamp(p.Y, aabb.Min.Y, aabb.Max.Y),
+		Z: ints.Clamp(p.Z, aabb.Min.Z, aabb.Max.Z),
+	}
+}
+
+func (aabb AABB3) Wrap(p Point3) Point3 {
+	if !aabb.Valid {
+		return p
+	}
+	return Point3{
+		X: ints.Wrap(p.X, aabb.Min.X, aabb.Max.X),
+		Y: ints.Wrap(p.Y, aabb.Min.Y, aabb.Max.Y),
+		Z: ints.Wrap(p.Z, aabb.Min.Z, aabb.Max.Z),
+	}
+}
+
+func (aabb AABB3) All() iter.Seq[Point3] {
+	return func(yield func(Point3) bool) {
+		if !aabb.Valid {
+			return
+		}
+
+		for z := aabb.Min.Z; z <= aabb.Max.Z; z++ {
+			for y := aabb.Min.Y; y <= aabb.Max.Y; y++ {
+				for x := aabb.Min.X; x <= aabb.Max.X; x++ {
+					if !yield(Point3{X: x, Y: y, Z: z}) {
+						return
+					}
+				}
+			}
+		}
 	}
 }

@@ -78,7 +78,7 @@ func main() {
 				s = ss
 			} else {
 				p, _, err := path.Shortest(graph, a, path.EndConst(b))
-				evil.Assert(err == nil, "path not found from ", a, " to ", b)
+				evil.Assert(err == nil, "path not found from %s to %s", a, b)
 
 				for i, c := range p {
 					shortest[conn{c, b, 0}.sorted()] = p[i:]

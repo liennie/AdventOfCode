@@ -67,7 +67,7 @@ func main() {
 		X: len(garden[0]) / 2,
 		Y: len(garden) / 2,
 	}
-	evil.Assert(start == center, "start not in center", start, center)
+	evil.Assert(start == center, "start not in center, start: %v, center: %v", start, center)
 
 	mod := len(garden)
 
@@ -211,7 +211,7 @@ func main() {
 					if i == 0 {
 						want = contains
 					} else {
-						evil.Assert(contains == want, "misbehaving input ", x, y, g, offset.Z, off, contains, want)
+						evil.Assert(contains == want, "misbehaving input, x: %d, y: %d, g: %d, z: %d, off: %v, contains: %v, want: %v ", x, y, g, offset.Z, off, contains, want)
 					}
 				}
 			}

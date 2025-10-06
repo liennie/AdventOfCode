@@ -36,7 +36,7 @@ func parse(filename string) []Springs {
 		field, groups, ok := strings.Cut(line, " ")
 		evil.Assert(ok, "invalid format")
 		for _, c := range field {
-			evil.Assert(c == '.' || c == '#' || c == '?', "invalid char ", c)
+			evil.Assert(c == '.' || c == '#' || c == '?', "invalid char %c", c)
 		}
 		res = append(res, Springs{
 			raw:    []byte(field),
@@ -94,7 +94,7 @@ func combinations(raw []byte, groups []int, l int) (res int) {
 }
 
 func overlaps(a, b []byte) bool {
-	evil.Assert(len(a) == len(b))
+	evil.Assert(len(a) == len(b), "different len: %d != %d", len(a), len(b))
 
 	for i := range a {
 		if a[i] != '?' && b[i] != '?' && a[i] != b[i] {

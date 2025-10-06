@@ -29,7 +29,7 @@ func inBounds(octopuses [][]int, i, j int) bool {
 
 func contains(flashes []space.Point, p space.Point) bool {
 	for _, flash := range flashes {
-		if flash.Equals(p) {
+		if flash == p {
 			return true
 		}
 	}

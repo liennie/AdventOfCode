@@ -11,7 +11,7 @@ import (
 func parse(filename string) map[space.Point]int {
 	res := map[space.Point]int{}
 	load.Grid(filename, func(p space.Point, r rune) {
-		evil.Assert('0' <= r && r <= '9', "invalid char ", string(r))
+		evil.Assert('0' <= r && r <= '9', "invalid char %c", r)
 		res[p] = int(r - '0')
 	})
 	return res

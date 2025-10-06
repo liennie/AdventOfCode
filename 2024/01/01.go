@@ -12,7 +12,7 @@ import (
 func parse(filename string) (left, right []int) {
 	for line := range load.File(filename) {
 		ns := evil.Fields(line)
-		evil.Assert(len(ns) == 2, "len is not 2: ", len(ns))
+		evil.Assert(len(ns) == 2, "len is not 2: %d", len(ns))
 
 		left = append(left, ns[0])
 		right = append(right, ns[1])
@@ -34,7 +34,7 @@ func main() {
 	filename := load.Filename()
 
 	left, right := parse(filename)
-	evil.Assert(len(left) == len(right), "slices have different len: ", len(left), " != ", len(right))
+	evil.Assert(len(left) == len(right), "slices have different len: %d != %d", len(left), len(right))
 
 	// Part 1
 	sortedLeft := slices.Sorted(slices.Values(left))

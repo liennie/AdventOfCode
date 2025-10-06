@@ -19,7 +19,7 @@ type Machine struct {
 
 func parseLine(re regexp.Regexp, line string) space.Point {
 	match := re.FindStringSubmatch(line)
-	evil.Assert(match != nil, "line '", line, "' does not match regexp '", re.String(), "'")
+	evil.Assert(match != nil, "line %q does not match regexp %q", line, re.String())
 
 	return space.Point{
 		X: evil.Atoi(match[1]),
@@ -95,7 +95,7 @@ func tokens(machine Machine) int {
 	m := mf.N
 
 	// m * A + n * B == P
-	evil.Assert(a.Scale(m).Add(b.Scale(n)) == p, "incorrect ", m, n, machine, a.Scale(m).Add(b.Scale(n)))
+	evil.Assert(a.Scale(m).Add(b.Scale(n)) == p, "incorrect %d, %d, %v, %v", m, n, machine, a.Scale(m).Add(b.Scale(n)))
 
 	return 3*m + n
 }

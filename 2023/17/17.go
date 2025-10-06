@@ -80,7 +80,7 @@ func (g Graph) Edges(n Node) []path.Edge[Node] {
 	return edges
 }
 
-func (g Graph) Heuristic(n Node) int {
+func (g Graph) ShortestRemainigDist(n Node) int {
 	return n.pos.Sub(g.end).ManhattanLen()
 }
 

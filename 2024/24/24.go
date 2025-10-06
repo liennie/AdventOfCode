@@ -22,35 +22,43 @@ func boolValue(value string) bool {
 }
 
 const (
-	OpOR  = "OR"
-	OpAND = "AND"
-	OpXOR = "XOR"
+	OpCONST = ""
+	OpOR    = "OR"
+	OpAND   = "AND"
+	OpXOR   = "XOR"
 )
 
 type Gate struct {
 	in1, in2 string
 	op       string
 	out      string
+	value    bool
+	valueSet bool
 }
 
-func (g Gate) get(wires map[string]bool, gates map[string]Gate) (res bool) {
+func (g *Gate) get(gates Gates) (res bool) {
 	defer func() {
-		wires[g.out] = res
+		g.value = res
+		g.valueSet = true
 	}()
 
-	var in1, in2, ok bool
-	if in1, ok = wires[g.in1]; !ok {
-		if _, ok := gates[g.in1]; !ok {
-			evil.Panic("invalid gate %s -> %s", g.in1, g.out)
-		}
-		in1 = gates[g.in1].get(wires, gates)
+	if g.valueSet {
+		return g.value
 	}
-	if in2, ok = wires[g.in2]; !ok {
-		if _, ok := gates[g.in2]; !ok {
-			evil.Panic("invalid gate %s -> %s", g.in2, g.out)
-		}
-		in2 = gates[g.in2].get(wires, gates)
+
+	if !g.valueSet && g.op == OpCONST {
+		evil.Panic("empty gate")
 	}
+
+	if _, ok := gates[g.in1]; !ok {
+		evil.Panic("invalid gate %s -> %s", g.in1, g.out)
+	}
+	in1 := gates[g.in1].get(gates)
+
+	if _, ok := gates[g.in2]; !ok {
+		evil.Panic("invalid gate %s -> %s", g.in2, g.out)
+	}
+	in2 := gates[g.in2].get(gates)
 
 	switch g.op {
 	case OpOR:
@@ -66,27 +74,94 @@ func (g Gate) get(wires map[string]bool, gates map[string]Gate) (res bool) {
 	return false
 }
 
-func parse(filename string) (map[string]bool, map[string]Gate) {
+func (g *Gate) reset() {
+	if g.op != OpCONST {
+		g.valueSet = false
+	}
+}
+
+type Gates map[string]*Gate
+
+func (g Gates) bits() uint8 {
+	for i := uint8(0); ; i++ {
+		if _, ok := g[fmt.Sprintf("z%02d", i)]; !ok {
+			return i
+		}
+	}
+}
+
+func (g Gates) reset() {
+	for _, gate := range g {
+		gate.reset()
+	}
+}
+
+func (g Gates) get(n string) uint64 {
+	number := uint64(0)
+	for i := 0; ; i++ {
+		wire := fmt.Sprintf("%s%02d", n, i)
+		if _, ok := g[wire]; !ok {
+			break
+		}
+		number |= b2i(g[wire].get(g)) << i
+	}
+	return number
+}
+
+func (g Gates) run() uint64 {
+	return g.get("z")
+}
+
+func (g Gates) set(n string, v uint64) {
+	for i := 0; ; i++ {
+		wire := fmt.Sprintf("%s%02d", n, i)
+		if _, ok := g[wire]; !ok {
+			break
+		}
+
+		gate := g[wire]
+		if gate.op != OpCONST {
+			evil.Panic("trying to set non-const gate %s %s %s -> %s", gate.in1, gate.op, gate.in2, gate.out)
+		}
+
+		gate.value = (v & 1) != 0
+		v >>= 1
+	}
+}
+
+func (g Gates) add(x, y uint64) uint64 {
+	g.set("x", x)
+	g.set("y", y)
+	g.reset()
+	return g.run()
+}
+
+func parse(filename string) Gates {
 	ch := load.Blocks(filename)
 	defer channel.Drain(ch)
 
-	wires := map[string]bool{}
-	for line := range <-ch {
-		wire, value, ok := strings.Cut(line, ": ")
-		evil.Assert(ok, "invalid line format ", line)
+	gates := Gates{}
 
-		wires[wire] = boolValue(value)
+	for line := range <-ch {
+		out, value, ok := strings.Cut(line, ": ")
+		evil.Assert(ok, "invalid line format %q", line)
+
+		gates[out] = &Gate{
+			op:       OpCONST,
+			value:    boolValue(value),
+			valueSet: true,
+		}
 	}
 
-	gates := map[string]Gate{}
 	for line := range <-ch {
 		fields := strings.Fields(line)
-		evil.Assert(len(fields) == 5, "invalid line format ", line)
+		evil.Assert(len(fields) == 5, "invalid line format %q", line)
+		evil.Assert(fields[3] == "->", "invalid line format %q", line)
 
 		in1, op, in2, out := fields[0], fields[1], fields[2], fields[4]
-		evil.Assert(op == OpOR || op == OpAND || op == OpXOR, "invalid operation ", op)
+		evil.Assert(op == OpOR || op == OpAND || op == OpXOR, "invalid operation %s", op)
 
-		gates[out] = Gate{
+		gates[out] = &Gate{
 			in1: in1,
 			in2: in2,
 			op:  op,
@@ -94,10 +169,10 @@ func parse(filename string) (map[string]bool, map[string]Gate) {
 		}
 	}
 
-	return wires, gates
+	return gates
 }
 
-func b2i(v bool) int {
+func b2i(v bool) uint64 {
 	if v {
 		return 1
 	}
@@ -108,17 +183,11 @@ func main() {
 	defer evil.Recover(log.Err)
 	filename := load.Filename()
 
-	wires, gates := parse(filename)
+	gates := parse(filename)
 
 	// Part 1
-	number := 0
-	for i := 0; ; i++ {
-		wire := fmt.Sprintf("z%02d", i)
-		if _, ok := gates[wire]; !ok {
-			break
-		}
+	log.Part1(gates.run())
 
-		number |= b2i(gates[wire].get(wires, gates)) << i
-	}
-	log.Part1(number)
+	// Part 2
+	// solved by hand
 }

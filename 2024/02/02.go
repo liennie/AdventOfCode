@@ -45,7 +45,7 @@ func main() {
 	// Part 1
 	safe := 0
 	for r, report := range reports {
-		evil.Assert(len(report) > 1, "report ", r, " has len 1")
+		evil.Assert(len(report) > 1, "report %d has len 1", r)
 		if isSafe(report) {
 			safe++
 		}

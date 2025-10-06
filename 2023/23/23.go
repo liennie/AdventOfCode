@@ -41,7 +41,7 @@ func newGraph(forest [][]byte) *Graph {
 			break
 		}
 	}
-	evil.Assert(start.X >= 0)
+	evil.Assert(start.X >= 0, "start not found")
 
 	bottom := len(forest) - 1
 	end := space.Point{X: -1, Y: bottom}
@@ -51,7 +51,7 @@ func newGraph(forest [][]byte) *Graph {
 			break
 		}
 	}
-	evil.Assert(end.X >= 0)
+	evil.Assert(end.X >= 0, "end not found")
 
 	cross := map[space.Point]*Crossroads{}
 
@@ -165,7 +165,7 @@ func _longest(start, end *Crossroads, visited set.Set[*Crossroads], slippery boo
 
 func longest(start, end *Crossroads, slippery bool) int {
 	l, ok := _longest(start, end, set.New[*Crossroads](), slippery)
-	evil.Assert(ok)
+	evil.Assert(ok, "not found")
 	return l
 }
 

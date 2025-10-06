@@ -1,6 +1,8 @@
 package space
 
 import (
+	"iter"
+
 	"github.com/liennie/AdventOfCode/pkg/ints"
 )
 
@@ -54,5 +56,49 @@ func (aabb AABB) Expand(n int) AABB {
 		Valid: true,
 		Min:   aabb.Min.Add(Point{-n, -n}),
 		Max:   aabb.Max.Add(Point{n, n}),
+	}
+}
+
+func (aabb AABB) Size() Point {
+	if !aabb.Valid {
+		return Point{0, 0}
+	}
+
+	return aabb.Max.Sub(aabb.Min).Add(Point{1, 1})
+}
+
+func (aabb AABB) Clamp(p Point) Point {
+	if !aabb.Valid {
+		return p
+	}
+	return Point{
+		X: ints.Clamp(p.X, aabb.Min.X, aabb.Max.X),
+		Y: ints.Clamp(p.Y, aabb.Min.Y, aabb.Max.Y),
+	}
+}
+
+func (aabb AABB) Wrap(p Point) Point {
+	if !aabb.Valid {
+		return p
+	}
+	return Point{
+		X: ints.Wrap(p.X, aabb.Min.X, aabb.Max.X),
+		Y: ints.Wrap(p.Y, aabb.Min.Y, aabb.Max.Y),
+	}
+}
+
+func (aabb AABB) All() iter.Seq[Point] {
+	return func(yield func(Point) bool) {
+		if !aabb.Valid {
+			return
+		}
+
+		for y := aabb.Min.Y; y <= aabb.Max.Y; y++ {
+			for x := aabb.Min.X; x <= aabb.Max.X; x++ {
+				if !yield(Point{X: x, Y: y}) {
+					return
+				}
+			}
+		}
 	}
 }

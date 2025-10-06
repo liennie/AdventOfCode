@@ -14,7 +14,7 @@ import (
 
 func parsePoint(raw string) space.Point3 {
 	coords := evil.SplitN(raw, ",", 3)
-	evil.Assert(len(coords) == 3)
+	evil.Assert(len(coords) == 3, "invalid point %q", raw)
 	return space.Point3{
 		X: coords[0],
 		Y: coords[1],
@@ -26,7 +26,7 @@ func parse(filename string) *Tower {
 	bricks := []*Brick{}
 	for line := range load.File(filename) {
 		min, max, ok := strings.Cut(line, "~")
-		evil.Assert(ok)
+		evil.Assert(ok, "missing ~ in %q", line)
 
 		bricks = append(bricks, &Brick{aabb: space.NewAABB3(parsePoint(min), parsePoint(max))})
 	}

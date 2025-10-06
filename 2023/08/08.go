@@ -39,7 +39,7 @@ func parse(filename string) ([]int, map[string]Node) {
 	nodeRe := regexp.MustCompile(`^(\w{3}) = \((\w{3}), (\w{3})\)$`)
 	for line := range ch {
 		n := nodeRe.FindStringSubmatch(line)
-		evil.Assert(len(n) == 4, line, " did not match")
+		evil.Assert(len(n) == 4, "%q did not match", line)
 		nodes[n[1]] = Node{
 			left:  n[2],
 			right: n[3],
@@ -68,7 +68,7 @@ func main() {
 			}
 
 			node, ok := nodes[cur]
-			evil.Assert(ok, "missing node ", cur)
+			evil.Assert(ok, "missing node %s", cur)
 
 			switch dir {
 			case Left:
@@ -105,7 +105,7 @@ func main() {
 			}
 
 			node, ok := nodes[cur]
-			evil.Assert(ok, "missing node ", cur)
+			evil.Assert(ok, "missing node %s", cur)
 
 			switch dir {
 			case Left:
