@@ -37,4 +37,24 @@ func main() {
 		}
 	}
 	log.Part1(cnt)
+
+	// Part 2
+	cnt = 0
+	cur = 50
+	for _, n := range rots {
+		zero := cur == 0
+		cur += n
+		if cur >= 100 {
+			cnt += cur / 100
+			cur = ints.Mod(cur, 100)
+		} else if cur <= 0 {
+			cnt += (100 - cur) / 100
+			cur = ints.Mod(cur, 100)
+			if zero {
+				cnt-- // don't double count zeros
+			}
+		}
+		log.Printf("rot %d cur %d cnt %d", n, cur, cnt)
+	}
+	log.Part2(cnt)
 }
