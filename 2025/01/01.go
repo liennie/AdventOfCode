@@ -54,7 +54,6 @@ func main() {
 				cnt-- // don't double count zeros
 			}
 		}
-		log.Printf("rot %d cur %d cnt %d", n, cur, cnt)
 	}
 	log.Part2(cnt)
 }
