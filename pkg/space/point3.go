@@ -74,6 +74,7 @@ func (p Point3) ManhattanLen() int {
 }
 
 func (p Point3) Rot90(r Point3) Point3 {
+	r = r.Mod(Point3{4, 4, 4})
 	for i := 0; i < r.X; i++ {
 		p.Z, p.Y = p.Y, -p.Z
 	}
