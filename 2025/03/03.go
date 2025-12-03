@@ -15,24 +15,27 @@ func parse(filename string) [][]int {
 	return res
 }
 
-func largestJoltage(bank []int) int {
-	maxFirst := 0
-	maxPos := -1
-	for i, n := range bank[:len(bank)-1] {
-		if n > maxFirst {
-			maxFirst = n
-			maxPos = i
-		}
-	}
+func largestJoltage(n int) func(bank []int) int {
+	return func(bank []int) int {
+		joltage := 0
 
-	maxSecond := 0
-	for _, n := range bank[maxPos+1:] {
-		if n > maxSecond {
-			maxSecond = n
-		}
-	}
+		k := 0
+		for i := range n {
+			max := 0
+			for j := k; j < len(bank)-n+1+i; j++ {
+				b := bank[j]
+				if b > max {
+					max = b
+					k = j + 1
+				}
+			}
 
-	return 10*maxFirst + maxSecond
+			joltage *= 10
+			joltage += max
+		}
+
+		return joltage
+	}
 }
 
 func main() {
@@ -42,5 +45,8 @@ func main() {
 	banks := parse(filename)
 
 	// Part 1
-	log.Part1(ints.SumFunc(largestJoltage, banks...))
+	log.Part1(ints.SumFunc(largestJoltage(2), banks...))
+
+	// Part 2
+	log.Part2(ints.SumFunc(largestJoltage(12), banks...))
 }
