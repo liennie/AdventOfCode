@@ -93,3 +93,13 @@ func Orthogonal() iter.Seq[Point] {
 		}
 	}
 }
+
+func Neighbors() iter.Seq[Point] {
+	return func(yield func(Point) bool) {
+		for _, d := range [...]Point{{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}} {
+			if !yield(d) {
+				return
+			}
+		}
+	}
+}
