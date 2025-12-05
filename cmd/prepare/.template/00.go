@@ -20,4 +20,7 @@ func main() {
 
 	// Part 1
 	log.Part1(nil)
+
+	// Part 2
+	log.Part2(nil)
 }

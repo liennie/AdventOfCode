@@ -76,5 +76,5 @@ func main() {
 			}
 		}
 	}
-	log.Part1(sum)
+	log.Part2(sum)
 }
