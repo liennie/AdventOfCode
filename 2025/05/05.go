@@ -43,4 +43,7 @@ func main() {
 		}
 	}
 	log.Part1(cnt)
+
+	// Part 2
+	log.Part2(ranges.Len())
 }
