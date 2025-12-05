@@ -116,3 +116,12 @@ func (rs RangeSet) Clone() RangeSet {
 	}
 	return res
 }
+
+func (rs RangeSet) Contains(other int) bool {
+	for r := range rs {
+		if r.Contains(other) {
+			return true
+		}
+	}
+	return false
+}
