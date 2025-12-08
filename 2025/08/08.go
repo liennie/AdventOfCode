@@ -56,7 +56,11 @@ func main() {
 		circuits[box] = set.New(box)
 	}
 
-	for _, pair := range pairs[:1000] {
+	upto := 1000
+	if filename == "test.txt" {
+		upto = 10
+	}
+	for _, pair := range pairs[:upto] {
 		if circuits[pair.a].Contains(pair.b) {
 			continue
 		}
@@ -86,5 +90,29 @@ func main() {
 	log.Part1(ints.Product(sizes[:3]...))
 
 	// Part 2
-	log.Part2(nil)
+	circuits = map[space.Point3]set.Set[space.Point3]{}
+	for _, box := range boxes {
+		circuits[box] = set.New(box)
+	}
+
+	cable := 0
+	for _, pair := range pairs {
+		if circuits[pair.a].Contains(pair.b) {
+			continue
+		}
+
+		connected := set.Union(circuits[pair.a], circuits[pair.b])
+		for box := range circuits[pair.a] {
+			circuits[box] = connected
+		}
+		for box := range circuits[pair.b] {
+			circuits[box] = connected
+		}
+
+		if len(connected) == len(boxes) {
+			cable = pair.a.X * pair.b.X
+			break
+		}
+	}
+	log.Part2(cable)
 }
