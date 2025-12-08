@@ -1,10 +1,12 @@
 package main
 
 import (
+	"maps"
+
 	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
-	"github.com/liennie/AdventOfCode/pkg/set"
 	"github.com/liennie/AdventOfCode/pkg/space"
 )
 
@@ -28,22 +30,22 @@ func main() {
 
 	manifold, start := parse(filename)
 
-	// Part 1
-	beams := set.New(start.X)
-	next := set.New[int]()
+	beams := map[int]int{start.X: 1}
+	next := map[int]int{}
 	y := start.Y
 	split := 0
 loop:
 	for {
-		next.Clear()
-		for beam := range beams {
+		clear(next)
+		for beam, cnt := range beams {
 			switch manifold[space.Point{X: beam, Y: y}] {
 			case '^':
 				split++
-				next.Add(beam-1, beam+1)
+				next[beam-1] += cnt
+				next[beam+1] += cnt
 
 			case '.', 'S':
-				next.Add(beam)
+				next[beam] += cnt
 
 			default:
 				break loop
@@ -54,7 +56,5 @@ loop:
 		y++
 	}
 	log.Part1(split)
-
-	// Part 2
-	log.Part2(nil)
+	log.Part2(ints.SumSeq(maps.Values(beams)))
 }
