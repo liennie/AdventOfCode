@@ -51,6 +51,10 @@ func (s Set[T]) RemoveSeq(items iter.Seq[T]) {
 	}
 }
 
+func (s Set[T]) Clear() {
+	clear(s)
+}
+
 func (s Set[T]) Contains(items ...T) bool {
 	for _, item := range items {
 		if _, ok := s[item]; !ok {
