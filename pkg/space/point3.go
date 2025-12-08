@@ -73,6 +73,10 @@ func (p Point3) ManhattanLen() int {
 	return ints.Abs(p.X) + ints.Abs(p.Y) + ints.Abs(p.Z)
 }
 
+func (p Point3) LenSquared() int {
+	return p.X*p.X + p.Y*p.Y + p.Z*p.Z
+}
+
 func (p Point3) Rot90(r Point3) Point3 {
 	r = r.Mod(Point3{4, 4, 4})
 	for i := 0; i < r.X; i++ {
