@@ -63,6 +63,17 @@ func (p Point) Scale(sc int) Point {
 	}
 }
 
+func (p Point) Abs() Point {
+	return Point{
+		X: ints.Abs(p.X),
+		Y: ints.Abs(p.Y),
+	}
+}
+
+func (p Point) Area() int {
+	return p.X * p.Y
+}
+
 func (p Point) ManhattanLen() int {
 	return ints.Abs(p.X) + ints.Abs(p.Y)
 }

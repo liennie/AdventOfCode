@@ -65,6 +65,18 @@ func (p Point3) Scale(sc int) Point3 {
 	}
 }
 
+func (p Point3) Abs() Point3 {
+	return Point3{
+		X: ints.Abs(p.X),
+		Y: ints.Abs(p.Y),
+		Z: ints.Abs(p.Z),
+	}
+}
+
+func (p Point3) Area() int {
+	return p.X * p.Y * p.Z
+}
+
 func (p Point3) Equals(other Point3) bool {
 	return p.X == other.X && p.Y == other.Y && p.Z == other.Z
 }
