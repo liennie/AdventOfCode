@@ -102,3 +102,32 @@ func (aabb AABB) All() iter.Seq[Point] {
 		}
 	}
 }
+
+func (aabb AABB) Outline() iter.Seq[Point] {
+	return func(yield func(Point) bool) {
+		if !aabb.Valid {
+			return
+		}
+
+		for y := aabb.Min.Y; y < aabb.Max.Y; y++ {
+			if !yield(Point{X: aabb.Min.X, Y: y}) {
+				return
+			}
+		}
+		for x := aabb.Min.X; x < aabb.Max.X; x++ {
+			if !yield(Point{X: x, Y: aabb.Max.Y}) {
+				return
+			}
+		}
+		for y := aabb.Max.Y; y > aabb.Min.Y; y-- {
+			if !yield(Point{X: aabb.Max.X, Y: y}) {
+				return
+			}
+		}
+		for x := aabb.Max.X; x > aabb.Min.X; x-- {
+			if !yield(Point{X: x, Y: aabb.Min.Y}) {
+				return
+			}
+		}
+	}
+}
