@@ -10,6 +10,8 @@ import (
 	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
+	"github.com/liennie/AdventOfCode/pkg/seq"
+	"github.com/liennie/AdventOfCode/pkg/set"
 )
 
 type Machine struct {
@@ -61,6 +63,17 @@ func minJoltagePresses(buttons [][]int, target []int) int {
 	type group struct {
 		buttons [][]int
 		idx     int
+
+		common []int
+	}
+
+	deadEnd := func(group group, target []int) bool {
+		for _, u := range group.common {
+			if target[u] < target[group.idx] {
+				return true
+			}
+		}
+		return false
 	}
 
 	groups := []group{}
@@ -95,6 +108,10 @@ func minJoltagePresses(buttons [][]int, target []int) int {
 		groups = append(groups, group{
 			buttons: cur,
 			idx:     idx,
+
+			common: slices.Collect(set.Intersection(slices.Collect(seq.Map(slices.Values(cur), func(s []int) set.Set[int] {
+				return set.New(s...)
+			}))...).All()),
 		})
 	}
 
@@ -107,6 +124,10 @@ func minJoltagePresses(buttons [][]int, target []int) int {
 			return max
 		}
 		group := groups[0]
+
+		if deadEnd(group, target) {
+			return max
+		}
 
 		var press func([][]int, int) int
 		press = func(buttons [][]int, m int) int {
