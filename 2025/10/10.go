@@ -1,11 +1,13 @@
 package main
 
 import (
+	"math"
 	"regexp"
 	"slices"
 
 	"github.com/liennie/AdventOfCode/pkg/comb"
 	"github.com/liennie/AdventOfCode/pkg/evil"
+	"github.com/liennie/AdventOfCode/pkg/ints"
 	"github.com/liennie/AdventOfCode/pkg/load"
 	"github.com/liennie/AdventOfCode/pkg/log"
 )
@@ -44,6 +46,90 @@ func parse(filename string) []Machine {
 	return res
 }
 
+func addJoltage(joltage []int, button []int, n int) {
+	for _, i := range button {
+		joltage[i] += n
+	}
+}
+
+func minJoltagePresses(buttons [][]int, target []int) int {
+	targetCpy := slices.Clone(target)
+	buttonsCpy := slices.Clone(buttons)
+	max := ints.Sum(target...) + 1
+
+	var minPresses func([][]int, []int) int
+	minPresses = func(buttons [][]int, target []int) (joltage int) {
+		if ints.Min(target...) < 0 {
+			return max
+		}
+		if ints.Sum(target...) == 0 {
+			return 0
+		}
+		if len(buttons) == 0 {
+			return max
+		}
+
+		n := make([]int, len(target))
+		for _, b := range buttons {
+			addJoltage(n, b, 1)
+		}
+		min := math.MaxInt
+		idx := -1
+		for j := range n {
+			if n[j] > 0 {
+				ch := comb.Choose(n[j]+target[j]-1, n[j]-1)
+				if ch < min {
+					min = ch
+					idx = j
+				}
+			} else {
+				if target[j] > 0 {
+					// no button for this idx, but still something left, we quit
+					return max
+				}
+			}
+		}
+		evil.Assert(idx != -1, "min not found")
+
+		cur := [][]int{}
+		rem := slices.Clone(buttons)
+		rem = slices.DeleteFunc(rem, func(b []int) bool {
+			if slices.Contains(b, idx) {
+				cur = append(cur, b)
+				return true
+			}
+			return false
+		})
+		evil.Assert(len(cur) > 0, "no buttons to press")
+
+		var press func([][]int, int) int
+		press = func(buttons [][]int, m int) int {
+			button := buttons[0]
+
+			if len(buttons) == 1 {
+				addJoltage(target, button, -m)
+				p := m + minPresses(rem, target)
+				addJoltage(target, button, m)
+				return p
+			}
+
+			min := max
+			for n := 0; n <= m; n++ {
+				addJoltage(target, button, -n)
+				p := n + press(buttons[1:], m-n)
+				if p < min {
+					min = p
+				}
+				addJoltage(target, button, n)
+			}
+			return min
+		}
+		return press(cur, target[idx])
+	}
+
+	return minPresses(buttonsCpy, targetCpy)
+}
+
 func main() {
 	defer evil.Recover(log.Err)
 	filename := load.Filename()
@@ -75,5 +161,11 @@ func main() {
 	log.Part1(sum)
 
 	// Part 2
-	log.Part2(nil)
+	sum = 0
+	for i, m := range machines {
+		presses := minJoltagePresses(m.buttons, m.joltage)
+		log.Printf("%d %v %v == %v", i, m.buttons, m.joltage, presses)
+		sum += presses
+	}
+	log.Part2(sum)
 }
