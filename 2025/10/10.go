@@ -53,22 +53,18 @@ func addJoltage(joltage []int, button []int, n int) {
 }
 
 func minJoltagePresses(buttons [][]int, target []int) int {
-	targetCpy := slices.Clone(target)
-	buttonsCpy := slices.Clone(buttons)
+	target = slices.Clone(target)
+	buttons = slices.Clone(buttons)
+
 	max := ints.Sum(target...) + 1
 
-	var minPresses func([][]int, []int) int
-	minPresses = func(buttons [][]int, target []int) (joltage int) {
-		if ints.Min(target...) < 0 {
-			return max
-		}
-		if ints.Sum(target...) == 0 {
-			return 0
-		}
-		if len(buttons) == 0 {
-			return max
-		}
+	type group struct {
+		buttons [][]int
+		idx     int
+	}
 
+	groups := []group{}
+	for len(buttons) > 0 {
 		n := make([]int, len(target))
 		for _, b := range buttons {
 			addJoltage(n, b, 1)
@@ -82,18 +78,12 @@ func minJoltagePresses(buttons [][]int, target []int) int {
 					min = ch
 					idx = j
 				}
-			} else {
-				if target[j] > 0 {
-					// no button for this idx, but still something left, we quit
-					return max
-				}
 			}
 		}
 		evil.Assert(idx != -1, "min not found")
 
 		cur := [][]int{}
-		rem := slices.Clone(buttons)
-		rem = slices.DeleteFunc(rem, func(b []int) bool {
+		buttons = slices.DeleteFunc(buttons, func(b []int) bool {
 			if slices.Contains(b, idx) {
 				cur = append(cur, b)
 				return true
@@ -102,13 +92,34 @@ func minJoltagePresses(buttons [][]int, target []int) int {
 		})
 		evil.Assert(len(cur) > 0, "no buttons to press")
 
+		groups = append(groups, group{
+			buttons: cur,
+			idx:     idx,
+		})
+	}
+
+	var minPresses func([]group, []int, int) int
+	minPresses = func(groups []group, target []int, indent int) (joltage int) {
+		if ints.Sum(target...) == 0 {
+			return 0
+		}
+		if len(groups) == 0 {
+			return max
+		}
+		group := groups[0]
+
 		var press func([][]int, int) int
 		press = func(buttons [][]int, m int) int {
 			button := buttons[0]
 
 			if len(buttons) == 1 {
 				addJoltage(target, button, -m)
-				p := m + minPresses(rem, target)
+				if ints.Min(target...) < 0 {
+					addJoltage(target, button, m)
+					return max
+				}
+
+				p := m + minPresses(groups[1:], target, indent+1)
 				addJoltage(target, button, m)
 				return p
 			}
@@ -124,10 +135,10 @@ func minJoltagePresses(buttons [][]int, target []int) int {
 			}
 			return min
 		}
-		return press(cur, target[idx])
+		return press(group.buttons, target[group.idx])
 	}
 
-	return minPresses(buttonsCpy, targetCpy)
+	return minPresses(groups, target, 0)
 }
 
 func main() {
