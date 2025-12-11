@@ -29,6 +29,36 @@ func parse(filename string) map[string]Device {
 	return res
 }
 
+type checklist struct {
+	none int
+	dac  int
+	fft  int
+	all  int
+}
+
+func (c checklist) add(other checklist) checklist {
+	return checklist{
+		none: c.none + other.none,
+		dac:  c.dac + other.dac,
+		fft:  c.fft + other.fft,
+		all:  c.all + other.all,
+	}
+}
+
+func (c checklist) checkDAC() checklist {
+	return checklist{
+		dac: c.dac + c.none,
+		all: c.all + c.fft,
+	}
+}
+
+func (c checklist) checkFFT() checklist {
+	return checklist{
+		fft: c.fft + c.none,
+		all: c.all + c.dac,
+	}
+}
+
 func main() {
 	defer evil.Recover(log.Err)
 	filename := load.Filename()
@@ -57,5 +87,32 @@ func main() {
 	log.Part1(states["out"])
 
 	// Part 2
-	log.Part2(nil)
+	states2 := map[string]checklist{
+		"svr": {
+			none: 1,
+		},
+	}
+	run = true
+	for run {
+		run = false
+		for n, c := range states2 {
+			switch n {
+			case "out":
+				continue
+
+			case "dac":
+				c = c.checkDAC()
+
+			case "fft":
+				c = c.checkFFT()
+			}
+			run = true
+
+			delete(states2, n)
+			for _, out := range devices[n].outputs {
+				states2[out] = states2[out].add(c)
+			}
+		}
+	}
+	log.Part2(states2["out"].all)
 }
