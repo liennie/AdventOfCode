@@ -7,7 +7,7 @@ YEAR=$(TZ=EST date +%Y)
 MONTH=$(TZ=EST date +%m)
 DAY=$(TZ=EST date +%d)
 
-if [[ $MONTH != 12 || $DAY > 25 ]]; then
+if [[ $MONTH != 12 || $DAY > 12 ]]; then
 	echo "🟡 Today is not an advent day"
 	exit 1
 fi
