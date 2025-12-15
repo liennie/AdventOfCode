@@ -240,7 +240,7 @@ func canFit(state [][]bool, maxx []int, presents []Present, cnts []int, debug st
 		log.Print(debug)
 		fmt.Print("\033[2K")
 		log.Print(max, cnts)
-		printState(maxInfo.state, maxx)
+		printState(maxInfo.state, maxInfo.maxx)
 		return canFit(maxInfo.state, maxInfo.maxx, presents, cnts, debug)
 	}
 	return false
