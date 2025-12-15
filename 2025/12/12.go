@@ -17,8 +17,9 @@ import (
 )
 
 type Present struct {
-	shapes [8][][]bool
-	area   int
+	shapes    [8][][]bool
+	area      int
+	footprint int
 }
 
 type Region struct {
@@ -80,6 +81,7 @@ func parse(filename string) ([]Present, []Region) {
 					p.area++
 				}
 			}
+			p.footprint += len(row)
 		}
 
 		presents = append(presents, p)
@@ -246,15 +248,17 @@ func canFit(state [][]bool, maxx []int, presents []Present, cnts []int, debug st
 
 func (r Region) canFit(presents []Present, debug string) bool {
 	totalArea := 0
+	totalFootprint := 0
 	for p, present := range presents {
 		totalArea += present.area * r.presents[p]
+		totalFootprint += present.footprint * r.presents[p]
 	}
 	if totalArea > r.w*r.h {
 		return false
 	}
-
-	// don't worry about it
-	return true
+	if totalFootprint <= r.w*r.h {
+		return true
+	}
 
 	fmt.Print("\033[2J")
 	return canFit(mkState(r.w, r.h), make([]int, r.h), presents, r.presents, debug)
